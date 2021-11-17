@@ -1,28 +1,24 @@
-%{ open Ast %}
+(* Abstract Syntax Tree *)
 
-%token PLUS MINUS TIMES DIVIDE EOF ASSIGN SEQ IF THEN ELSE
-%token <string> VAR
-%token <int> LITERAL
+type program = bind list * func_decl list
 
-%left SEQ
-%right ASSIGN
-%left IF THEN ELSE
-%left PLUS MINUS
-%left TIMES DIVIDE
+type typ = Int
 
-%start expr
-%type <Ast.expr> expr
+type bind = typ * string
 
-%%
+type expr =
+    Id of string
+    | Assign of string * expr
 
-expr:
-  expr PLUS   expr { Binop($1, Add, $3) }
-| expr MINUS  expr { Binop($1, Sub, $3) }
-| expr TIMES  expr { Binop($1, Mul, $3) }
-| expr DIVIDE expr { Binop($1, Div, $3) }
-| expr SEQ expr { Seq($1, $3) }
-| IF expr THEN expr ELSE expr { If($2, $4, $6) }
-| LITERAL          { Lit($1) }
-| VAR { Var($1) }
-| VAR ASSIGN expr { Asg($1, $3) }
+type stmt =
+    Block of stmt list
+    | Expr of expr
+
+
+type func_decl = {
+    typ : typ;
+    fname : string;
+    locals : bind list;
+    body : stmt list;
+}
 
