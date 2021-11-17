@@ -1,17 +1,24 @@
-open Ast
+(* Abstract Syntax Tree *)
 
-type sexpr = typ * sx
-and sx = 
-    SId of string
-    | SAssign of string * sexpr
+type program = bind list * func_decl list
 
-type sstmt =
-    SBlock of sstmt list
-    | SExpr of sexpr
+type typ = Int
 
-type sfunc_decl = {
-    styp : typ;
-    sfname : string;
-    slocals : bind list;
-    sbody : sstmt list;
+type bind = typ * string
+
+type expr =
+    Id of string
+    | Assign of string * expr
+
+type stmt =
+    Block of stmt list
+    | Expr of expr
+
+
+type func_decl = {
+    typ : typ;
+    fname : string;
+    locals : bind list;
+    body : stmt list;
 }
+
