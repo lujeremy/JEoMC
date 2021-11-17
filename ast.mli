@@ -1,9 +1,17 @@
-type operator = Add | Sub | Mul | Div
+open Ast
 
-type expr =
-    Binop of expr * operator * expr
-  | Lit of int
-  | Asg of string * expr
-  | Seq of expr * expr
-  | Var of string
-  | If of expr * expr * expr
+type sexpr = typ * sx
+and sx = 
+    SId of string
+    | SAssign of string * sexpr
+
+type sstmt =
+    SBlock of sstmt list
+    | SExpr of sexpr
+
+type sfunc_decl = {
+    styp : typ;
+    sfname : string;
+    slocals : bind list;
+    sbody : sstmt list;
+}
