@@ -1,24 +1,56 @@
-(* Abstract Syntax Tree *)
+/* Ocamlyacc parser for JEoMC */
 
-type program = bind list * func_decl list
+%{
+open Ast
+%}
 
-type typ = Int
+%token LPAREN RPAREN LBRACE RBRACE ASSIGN
+%token INT
+%token <string> ID
+%token EOF
 
-type bind = typ * string
+%start program
+%type <Ast.program> program
 
-type expr =
-    Id of string
-    | Assign of string * expr
+%right ASSIGN
 
-type stmt =
-    Block of stmt list
-    | Expr of expr
+%%
+
+program:
+    decls EOF {$1}
+
+decls:
+    decls vdecl {(($2 :: f $1), s $1)}
+    | decls fdecl {(f $1, ($2 :: s $1))}
+
+fdecl:
+    typ ID LPAREN RPAREN LBRACE vdecl_list stmt_list RBRACE
+        {{typ = $1;
+          fname = $2;
+          locals = List.rev $6;
+          body = List.rev $7}}
+
+vdecl:
+    typ ID {($1,$2)}
+
+typ:
+    INT {Int}
+
+vdecl_list:
+    vdecl_list vdecl { $2 :: $1 }
+
+stmt:
+    expr {Expr $1}
+    | LBRACE stmt_list RBRACE {Block(List.rev $2)}
+
+stmt_list:
+    stmt_list stmt {$2 :: $1}
+
+expr:
+    ID {Id($1)}
+    | ID ASSIGN expr {Assign($1,$3)}
+    | LPAREN expr RPAREN {$2}
 
 
-type func_decl = {
-    typ : typ;
-    fname : string;
-    locals : bind list;
-    body : stmt list;
-}
+
 
