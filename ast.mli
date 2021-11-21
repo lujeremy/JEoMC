@@ -1,7 +1,5 @@
 (* Abstract Syntax Tree *)
 
-type program = bind list * func_decl list
-
 type typ = Int
 
 type bind = typ * string
@@ -21,4 +19,6 @@ type func_decl = {
     locals : bind list;
     body : stmt list;
 }
+
+type program = bind list * func_decl list
 
