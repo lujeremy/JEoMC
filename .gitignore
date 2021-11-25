@@ -27,3 +27,9 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# IntelliJ files
+.idea
+
+# Build files
+build
