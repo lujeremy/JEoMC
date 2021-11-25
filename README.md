@@ -1,9 +1,13 @@
 # JEoMC
 A Geometric Programming Language
 
-1. Install freeglut (OpenGL toolkit)
-Ubuntu: `sudo apt-get install freeglut3-dev`
-MacOS (not tested): `brew install freeglut`
+1. Make a build directory\
+`mkdir build`\
+`cd build`
 
-2. Command to compile C program that draws with OpenGL
-`gcc draw.c -lGL -lGLU -lglut -lm`
+2. Cmake inside the directory, then make all\
+`cmake ..`\
+`make all`
+
+3. Run the newly created executable\
+`./JEoMC`
