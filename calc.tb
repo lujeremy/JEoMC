@@ -1,1 +1,0 @@
-baz = 2 ; bar = if baz - 2 then 42 + 2 else 17 ; baz + bar
