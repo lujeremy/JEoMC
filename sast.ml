@@ -12,6 +12,9 @@ type sstmt =
 type sfunc_decl = {
     styp : typ;
     sfname : string;
+    sformals : bind list;
     slocals : bind list;
     sbody : sstmt list;
 }
+
+type sprogram = bind list * sfunc_decl list
