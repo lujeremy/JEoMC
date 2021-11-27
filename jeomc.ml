@@ -1,27 +1,27 @@
-open Ast
+type action = Ast | Sast | LLVM_IR | Compile
 
-(*module Hashtbl = Hashtbl.Make(String);;*)
-let vals = Hashtbl.create 10;;
+let () =
+  let action = ref Compile in 
+  let set_action a () = action := a in
+  let speclist = [
+    ("-a", Arg.Unit (set_action Ast), "Print the AST");
+    ("-s", Arg.Unit (set_action Sast), "Print the SAST");
+    ("-l", Arg.Unit (set_action LLVM_IR), "Print the LLVM IR");
+    ("-c", Arg.Unit (set_action Compile), "Check and print LLVM IR (default)");
+  ] in 
+  let usage_msg = "usage: ./jeomc.native [-a|-s|-l|-c] [file.jemc]" in
+  let channel = ref stdin in 
+  Arg.parse speclist (fun filename -> channel := open_in filename) usage_msg;
 
-let rec eval = function 
-    Lit(x)            -> x
-  | Binop(e1, op, e2) ->
-      let v1  = eval e1 in
-      let v2 = eval e2 in
-          (match op with
-            Add -> v1 + v2
-              | Sub -> v1 - v2
-              | Mul -> v1 * v2
-              | Div -> v1 / v2)
-  | Asg(var, expr) ->
-        let r = eval expr in Hashtbl.add vals var r; r
-  | Seq(e1, e2) -> ignore (eval e1); eval e2
-  | Var(v) -> Hashtbl.find vals v
-  | If(e1, e2, e3) ->
-        if (eval e1 != 0) then eval e2 else eval e3
-
-let _ =
-  let lexbuf = Lexing.from_channel stdin in
-  let expr = Parser.expr Scanner.tokenize lexbuf in
-  let result = eval expr in
-  print_endline (string_of_int result)
+  let lexbuf = Lexing.from_channel !channel in 
+  let ast = Parser.program Scanner.tokenize lexbuf in 
+  match !action with
+    Ast -> print_string (Ast.string_of_program ast)
+    | _ -> let sast = Semant.check ast in 
+      match !action with 
+        Ast -> ()
+        (*| Sast -> print_string (Sast.string_of_sprogram sast)*)
+        | LLVM_IR -> print_string (Llvm.string_of_llmodule (Codegen.translate sast))
+        | Compile -> let m = Codegen.translate sast in 
+      Llvm_analysis.assert_valid_module m;
+      print_string (Llvm.string_of_llmodule m)
