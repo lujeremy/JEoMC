@@ -21,17 +21,17 @@ let check (globals, functions) =
         let add_bind map (name, ty) = StringMap.add name {
             typ = Int; (* double check this type *)
             fname = name;
-            formals = [(ty, "x")];
+            formals = [(ty,"x")];
             locals = []; body = []
-        } map in
-        List.fold_left add_bind StringMap.empty [ ("print", Int);
-                                              ("rotate", Int); ] (*add real funcs*)
+        } map
+        in List.fold_left add_bind StringMap.empty [ ("print", Int);
+                                                ] (*add real funcs*)
     in 
 
     let add_func map fd =
         let built_in_err = "Function " ^ fd.fname ^ " may not be defined"
             and dup_err = "Duplicate function " ^ fd.fname
-            and make_err err = raise (Failure er)
+            and make_err err = raise (Failure err)
             and n = fd.fname
         in match fd with
             _ when StringMap.mem n built_in_decls -> make_err built_in_err
@@ -58,7 +58,7 @@ let check (globals, functions) =
         in 
 
         let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
-                      StringMap.empty (globals @ func.formals @ func.locals)
+                      StringMap.empty (globals @ func.locals)
         in
 
         let type_of_identifier s =
@@ -82,7 +82,7 @@ let check (globals, functions) =
                 let rec check_stmt_list = function 
                     Block sl :: ss -> check_stmt_list (sl @ ss)
                     | s :: ss -> check_stmt s :: check_stmt_list ss 
-                    | []
+                    | [] -> []
                 in SBlock(check_stmt_list sl)
         in {
             styp = func.typ;
