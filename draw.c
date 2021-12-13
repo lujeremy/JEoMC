@@ -1,6 +1,8 @@
 #include <GLFW/glfw3.h>
+/* more dep */
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
+
 
 void draw(int c)
 {
@@ -10,6 +12,7 @@ void draw(int c)
     if (!glfwInit())
         return;
 
+/* new section */
 #ifdef __APPLE__
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR,3);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR,2);

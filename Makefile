@@ -6,6 +6,7 @@ test : all testall.sh
 # "make all" builds the executable as well as the "draw" library designed
 # to test linking external code
 .PHONY : all
+
 all : jeomc.native draw.o draw2.o
 # draw.o
 
@@ -13,6 +14,7 @@ all : jeomc.native draw.o draw2.o
 #before: opam config exec --
 jeomc.native :
 	opam exec -- \
+
 	ocamlbuild -use-ocamlfind jeomc.native
 
 # "make clean" removes all generated files
@@ -28,6 +30,7 @@ draw : draw.c
 
 draw2 : draw2.c
 	cc draw2.c -o draw2 -DBUILD_TEST -framework OpenGL -framework GLUT -lglfw -lGLEW
+#	cc -o draw -DBUILD_TEST draw.c
 
 ##############################
 
