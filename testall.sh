@@ -5,6 +5,30 @@
 #  Compile, run, and check the output of each expected-to-work test
 #  Compile and check the error of each expected-to-fail test
 
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     OS=Linux;;
+    Darwin*)    OS=Mac;;
+    CYGWIN*)    OS=Cygwin;;
+    MINGW*)     OS=MinGw;;
+    *)          OS="UNKNOWN:${unameOut}"
+esac
+
+
+# generate C linkers based on OS
+if [ ${OS} = "Mac" ]; then
+    # Mac OSX
+    printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
+    FLAGS="-framework OpenGL -framework GLUT -lglfw"
+elif [ ${OS} = "Linux" ]; then
+    # Assume Linux.
+    printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
+    FLAGS="-lGL -lGLU -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor -lm -lGLEW"
+else
+    printf "\nYou are currently running on ${OS}, we do not support this system\n\n"
+fi
+
+
 # Path to the LLVM interpreter
 LLI="lli"
 #LLI="/usr/local/opt/llvm/bin/lli"
@@ -93,22 +117,21 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$JEOMC" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
-    #Run "$CC" "-o" "${basename}.exe" "${basename}.s" "draw.o -lGL -lGLU -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor -lm" &&
-    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "draw.o draw2.o -framework OpenGL -framework GLUT -lglfw" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "draw.o draw2.o" "$FLAGS" &&
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
     # Report the status and clean up the generated files
 
     if [ $error -eq 0 ] ; then
-	if [ $keep -eq 0 ] ; then
-	    rm -f $generatedfiles
-	fi
-	echo "OK"
-	echo "###### SUCCESS" 1>&2
+        if [ $keep -eq 0 ] ; then
+            rm -f $generatedfiles
+        fi
+        echo "OK"
+        echo "###### SUCCESS" 1>&2
     else
-	echo "###### FAILED" 1>&2
-	globalerror=$error
+        echo "###### FAILED" 1>&2
+        globalerror=$error
     fi
 }
 

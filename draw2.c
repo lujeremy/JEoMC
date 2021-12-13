@@ -4,10 +4,23 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "stb_image_write.h"
-//#include <stb/stb_image_write.h>
 #include <stdio.h>
+
+/* MacOS imports */
+#if __has_include(<OpenGL/gl.h>)
 #include <OpenGL/gl.h>
+#endif
+#if __has_include(<GLUT/glut.h>)
 #include <GLUT/glut.h>
+#endif
+
+/* Linux imports */
+#if __has_include(<GL/gl.h>)
+#include <GL/gl.h>
+#endif
+#if __has_include(<GL/glut.h>)
+#include <GL/glut.h>
+#endif
 
 void saveImage(char *filepath, GLFWwindow *w){
     int width, height;

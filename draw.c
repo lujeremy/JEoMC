@@ -1,7 +1,20 @@
 #include <GLFW/glfw3.h>
-/* more dep */
+
+/* MacOS imports */
+#if __has_include(<OpenGL/gl.h>)
 #include <OpenGL/gl.h>
+#endif
+#if __has_include(<GLUT/glut.h>)
 #include <GLUT/glut.h>
+#endif
+
+/* Linux imports */
+#if __has_include(<GL/gl.h>)
+#include <GL/gl.h>
+#endif
+#if __has_include(<GL/glut.h>)
+#include <GL/glut.h>
+#endif
 
 
 void draw(int c)
@@ -12,7 +25,6 @@ void draw(int c)
     if (!glfwInit())
         return;
 
-/* new section */
 #ifdef __APPLE__
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR,3);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR,2);
