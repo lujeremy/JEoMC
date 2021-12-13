@@ -1,19 +1,19 @@
 #include <GLFW/glfw3.h>
 
-int main(void)
+void draw(int c)
 {
     GLFWwindow* window;
 
     /* Initialize the library */
     if (!glfwInit())
-        return -1;
+        return;
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "GLFW CMake starter", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
-        return -1;
+        return;
     }
 
     /* Make the window's context current */
@@ -34,5 +34,12 @@ int main(void)
     }
 
     glfwTerminate();
-    return 0;
+    return;
 }
+
+#ifdef BUILD_TEST
+int main()
+{
+  draw(1);
+}
+#endif

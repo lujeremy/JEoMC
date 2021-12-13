@@ -1,13 +1,19 @@
 # JEoMC
 A Geometric Programming Language
 
-1. Make a build directory\
-`mkdir build`\
-`cd build`
+Docker Instructions:
 
-2. Cmake inside the directory, then make all\
-`cmake ..`\
-`make all`
+First test that docker is installed correctly\
+`docker run hello-world`
 
-3. Run the newly created executable\
-`./JEoMC`
+Run image\
+`docker run --rm -it -w=/home/JEoMC lujeremy/jeomc`
+
+Clean up the directory if needed\
+`make clean`
+
+Check if there are any changes to repo\
+`git pull`
+
+Build. Tests should pass with OK\
+`make`

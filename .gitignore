@@ -33,3 +33,4 @@ _opam/
 
 # Build files
 build
+testall.log
