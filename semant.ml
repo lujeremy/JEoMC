@@ -42,7 +42,8 @@ let check (globals, functions) =
 			                         ("printb", Bool);
 			                         ("printf", Float);
 			                         ("printbig", Int);
-			                         ("draw", Int)]
+			                         ("draw", Int);
+									 ("draw2", Int)]
   in
 
   (* Add function name to symbol table *)

@@ -9,7 +9,7 @@ let () =
     ("-l", Arg.Unit (set_action LLVM_IR), "Print the LLVM IR");
     ("-c", Arg.Unit (set_action Compile), "Check and print LLVM IR (default)");
   ] in
-  let usage_msg = "usage: ./jeomc.native [-a|-s|-l|-c] [file.jemc]" in
+  let usage_msg = "usage: ./jeomc.native [-a|-s|-l|-c] [file.j]" in
   let channel = ref stdin in
   Arg.parse speclist (fun filename -> channel := open_in filename) usage_msg;
 

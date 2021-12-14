@@ -34,3 +34,7 @@ _opam/
 # Build files
 build
 testall.log
+*.ll
+*.s
+*.png
+*.exe

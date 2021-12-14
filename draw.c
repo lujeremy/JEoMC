@@ -1,5 +1,22 @@
 #include <GLFW/glfw3.h>
 
+/* MacOS imports */
+#if __has_include(<OpenGL/gl.h>)
+#include <OpenGL/gl.h>
+#endif
+#if __has_include(<GLUT/glut.h>)
+#include <GLUT/glut.h>
+#endif
+
+/* Linux imports */
+#if __has_include(<GL/gl.h>)
+#include <GL/gl.h>
+#endif
+#if __has_include(<GL/glut.h>)
+#include <GL/glut.h>
+#endif
+
+
 void draw(int c)
 {
     GLFWwindow* window;
@@ -7,6 +24,13 @@ void draw(int c)
     /* Initialize the library */
     if (!glfwInit())
         return;
+
+#ifdef __APPLE__
+    glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR,2);
+    glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
+    glfwWindowHint (GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+#endif
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "GLFW CMake starter", NULL, NULL);
@@ -38,7 +62,7 @@ void draw(int c)
 }
 
 #ifdef BUILD_TEST
-int main()
+int main(int argc, char *argv[])
 {
   draw(1);
 }
