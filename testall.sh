@@ -19,7 +19,7 @@ esac
 if [ ${OS} = "Mac" ]; then
     # Mac OSX
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
-    FLAGS="-framework OpenGL -framework GLUT -lglfw"
+    FLAGS="-framework OpenGL -framework GLUT -lglfw -lGLEW"
 elif [ ${OS} = "Linux" ]; then
     # Assume Linux.
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
