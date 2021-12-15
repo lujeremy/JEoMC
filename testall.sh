@@ -20,21 +20,25 @@ if [ ${OS} = "Mac" ]; then
     # Mac OSX
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
     FLAGS="-framework OpenGL -framework GLUT -lglfw -lGLEW"
+
+    # Path to the LLVM interpreter
+    LLI="/usr/local/opt/llvm@8/bin/lli"
+
+    # Path to the LLVM compiler
+    LLC="/usr/local/opt/llvm@8/bin/llc"
 elif [ ${OS} = "Linux" ]; then
     # Assume Linux.
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
     FLAGS="-lGL -lGLU -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor -lm -lGLEW"
+
+    # Path to the LLVM interpreter
+    LLI="lli"
+
+    # Path to the LLVM compiler
+    LLC="llc"
 else
     printf "\nYou are currently running on ${OS}, we do not support this system\n\n"
 fi
-
-
-# Path to the LLVM interpreter
-LLI="lli"
-#LLI="/usr/local/opt/llvm/bin/lli"
-
-# Path to the LLVM compiler
-LLC="llc"
 
 # Path to the C compiler
 CC="cc"
