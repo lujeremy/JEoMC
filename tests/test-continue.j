@@ -3,10 +3,10 @@ int main(){
     int i;
     j = 0;
     for (i=0;i<5;i=i+1){
-		if (i == 3) {
-			i = i+1;
-			continue;
-		}
+    if (i == 3) {
+      i = i+1;
+      continue;
+    }
         j = j+i;
     }
     print(j);
