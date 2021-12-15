@@ -161,6 +161,8 @@ let check (globals, functions) =
       | For(e1, e2, e3, st) ->
 	  SFor(expr e1, check_bool_expr e2, expr e3, check_stmt st)
       | While(p, s) -> SWhile(check_bool_expr p, check_stmt s)
+	  | Break -> SBreak
+	  | Continue -> SContinue
       | Return e -> let (t, e') = expr e in
         if t = func.typ then SReturn (t, e') 
         else raise (
@@ -173,6 +175,10 @@ let check (globals, functions) =
           let rec check_stmt_list = function
               [Return _ as s] -> [check_stmt s]
             | Return _ :: _   -> raise (Failure "nothing may follow a return")
+			| [Break as s] -> [check_stmt s]
+			| Break :: _   -> raise (Failure "nothing may follow a break")
+			| [Continue as s] -> [check_stmt s]
+			| Continue :: _   -> raise (Failure "nothing may follow a continue")
             | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)
             | s :: ss         -> check_stmt s :: check_stmt_list ss
             | []              -> []
