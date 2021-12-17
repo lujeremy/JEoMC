@@ -1,12 +1,12 @@
 #include <GLFW/glfw3.h>
 
 /* MacOS imports */
-//#if __has_include(<OpenGL/gl.h>)
-//#include <OpenGL/gl.h>
-//#endif
-//#if __has_include(<GLUT/glut.h>)
-//#include <GLUT/glut.h>
-//#endif
+#if __has_include(<OpenGL/gl.h>)
+#include <OpenGL/gl.h>
+#endif
+#if __has_include(<GLUT/glut.h>)
+#include <GLUT/glut.h>
+#endif
 
 /* Linux imports */
 #if __has_include(<GL/gl.h>)

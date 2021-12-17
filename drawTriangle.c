@@ -20,6 +20,10 @@
 #include <GL/glut.h>
 #endif
 
+GLFWwindow* window;
+int vaoIndex = 0;
+GLuint vao_arr[50] = {0};
+
 void saveImage(char *filepath, GLFWwindow *w){
     int width, height;
     glfwGetFramebufferSize(w,&width,&height);
@@ -35,9 +39,7 @@ void saveImage(char *filepath, GLFWwindow *w){
     stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
 }
 
-GLFWwindow* jeomcInit() {
-
-    GLFWwindow* window;
+void jeomcInit() {
 
     /* Initialize the library */
     if (!glfwInit())
@@ -57,11 +59,34 @@ GLFWwindow* jeomcInit() {
 
     glewExperimental = GL_TRUE;
     glewInit();
-    return window;
+    return;
 }
 
-GLuint createShaders() {
+void drawTriangle(float x, float y, float f) {
 
+    float points[] = {
+      x, y+f, 0.0f,
+      x+f, y-f, 0.0f,
+      x-f, y-f, 0.0f,
+    };
+
+    GLuint VBO1, VAO1, EBO;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO1);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,NULL);
+    glEnableVertexAttribArray(0);
+
+    vao_arr[vaoIndex] = VAO1;
+    vaoIndex++;
+    return;
+}
+
+void jeomcRunAndSave() {
     const char *vertex_shader =
       "#version 330\n"
       "in vec3 vp;"
@@ -89,59 +114,6 @@ GLuint createShaders() {
     glAttachShader(shader_programme,vs);
     glLinkProgram(shader_programme);
 
-    return shader_programme;
-}
-
-GLuint* drawTriangle(GLFWwindow* window, float x, float y, float f) {
-
-    float points[] = {
-      x, y+f, 0.0f,
-      x+f, y-f, 0.0f,
-      x-f, y-f, 0.0f,
-    };
-
-    float points2[] = {
-      -x, -y+f, 0.0f,
-      -x+f, -y-f, 0.0f,
-      -x-f, -y-f, 0.0f,
-    };
-
-    GLuint VBO1, VAO1, EBO;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-    glGenBuffers(1, &EBO);
-
-    GLuint VBO2, VAO2;
-    glGenVertexArrays(1, &VAO2);
-    glGenBuffers(1, &VBO2);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,NULL);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
-
-    glBindVertexArray(VAO2);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points2), points2, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,NULL);
-    glEnableVertexAttribArray(0);
-
-    GLuint* vaos = malloc(2);
-    if (!vaos) {
-      return NULL;
-    }
-
-    vaos[0] = VAO1;
-    vaos[1] = VAO2;
-    return vaos;
-}
-
-
-void jeomcRun(GLFWwindow* window, GLuint* vaos, GLuint shader) {
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -150,13 +122,12 @@ void jeomcRun(GLFWwindow* window, GLuint* vaos, GLuint shader) {
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shader);
+        glUseProgram(shader_programme);
 
-        glBindVertexArray(*vaos);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindVertexArray(vaos[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        for (int i = 0; i < vaoIndex; i++) {
+          glBindVertexArray(*(vao_arr + i));
+          glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -170,14 +141,12 @@ void jeomcRun(GLFWwindow* window, GLuint* vaos, GLuint shader) {
 #ifdef BUILD_TEST
 int main(int argc, char *argv[]) {
 
-  GLFWwindow* window = jeomcInit();
-  GLuint shader = createShaders();
+  jeomcInit();
 
-  GLuint* vaos = drawTriangle(window, 0.5f, 0.5f, 0.25f);
-  jeomcRun(window, vaos, shader);
+  drawTriangle(0.5f, 0.5f, 0.25f);
+  drawTriangle(-0.5f, -0.5f, 0.25f);
+  drawTriangle(-0.5f, 0.5f, 0.5f);
 
-  if (vaos) {
-    free(vaos);
-  }
+  jeomcRunAndSave();
 }
 #endif
