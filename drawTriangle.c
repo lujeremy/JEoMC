@@ -35,16 +35,8 @@ void saveImage(char *filepath, GLFWwindow *w){
     stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
 }
 
-//GLFWwindow* jeomcInit() {
-//    return window;
-//}
-//
-//void jeomcTerminate() {
-//
-//}
+GLFWwindow* jeomcInit() {
 
-void drawTriangle(float x, float y, float f)
-{
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -65,6 +57,10 @@ void drawTriangle(float x, float y, float f)
 
     glewExperimental = GL_TRUE;
     glewInit();
+    return window;
+}
+
+GLuint createShaders() {
 
     const char *vertex_shader =
       "#version 330\n"
@@ -92,6 +88,11 @@ void drawTriangle(float x, float y, float f)
     glAttachShader(shader_programme,fs);
     glAttachShader(shader_programme,vs);
     glLinkProgram(shader_programme);
+
+    return shader_programme;
+}
+
+GLuint* drawTriangle(GLFWwindow* window, float x, float y, float f) {
 
     float points[] = {
       x, y+f, 0.0f,
@@ -129,6 +130,18 @@ void drawTriangle(float x, float y, float f)
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);
 
+    GLuint* vaos = malloc(2);
+    if (!vaos) {
+      return NULL;
+    }
+
+    vaos[0] = VAO1;
+    vaos[1] = VAO2;
+    return vaos;
+}
+
+
+void jeomcRun(GLFWwindow* window, GLuint* vaos, GLuint shader) {
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -137,40 +150,34 @@ void drawTriangle(float x, float y, float f)
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(shader);
 
-        glUseProgram(shader_programme);
-//        glBindVertexArray(vao);
-
-        //use to draw a triangle---------------
-//        glDrawArrays(GL_TRIANGLES,0,3);
-
-        glBindVertexArray(VAO1);
+        glBindVertexArray(*vaos);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        //glBindVertexArray(0);
 
-        glBindVertexArray(VAO2);
+        glBindVertexArray(vaos[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-
     }
 
     saveImage("img.png", window);
     glfwTerminate();
     return;
-
-    return;
 }
 
 #ifdef BUILD_TEST
-int main(int argc, char *argv[])
-{
-//  GLFWwindow* window = jeomcInit();
-  drawTriangle(0.5f, 0.5f, 0.25f);
-//  drawTriangle(window, -0.5f, -0.5f, 0.5f);
-//  jeomcTerminate();
+int main(int argc, char *argv[]) {
+
+  GLFWwindow* window = jeomcInit();
+  GLuint shader = createShaders();
+
+  GLuint* vaos = drawTriangle(window, 0.5f, 0.5f, 0.25f);
+  jeomcRun(window, vaos, shader);
+
+  if (vaos) {
+    free(vaos);
+  }
 }
 #endif
