@@ -60,10 +60,10 @@ void jeomcInit() {
    Insert vao into global array and increment index */
 void drawTriangle(double x, double y, double f) {
 
-    float points[] = {
-      x, y+f, 0.0d,
-      x+f, y-f, 0.0d,
-      x-f, y-f, 0.0d,
+    double points[] = {
+      x, y+f, 0.0,
+      x+f, y-f, 0.0,
+      x-f, y-f, 0.0,
     };
 
     GLuint VBO1, VAO1, EBO;
@@ -160,9 +160,9 @@ int main(int argc, char *argv[]) {
 
   jeomcInit();
 
-  drawTriangle(0.5d, 0.5d, 0.25d);
-  drawTriangle(-0.5d, -0.5d, 0.25d);
-  drawTriangle(-0.5d, 0.5d, 0.5d);
+  drawTriangle(0.5, 0.5, 0.25);
+  drawTriangle(-0.5, -0.5, 0.25);
+  drawTriangle(-0.5, 0.5, 0.5);
 
   jeomcRunAndSave();
 }
