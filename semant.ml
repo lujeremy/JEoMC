@@ -41,7 +41,6 @@ let check (globals, functions) =
     in List.fold_left add_bind StringMap.empty [  ("print", [(Int, "x")]);
                                                   ("printb", [(Bool, "x")]);
                                                   ("printf", [(Float, "x")]);
-                                                  ("printbig", [(Int, "x")]);
                                                   ("draw", [(Int, "x")]);
                                                   ("draw2", [(Int, "x")]);
                                                   ("drawTriangle", [(Float, "x"); (Float, "y"); (Float, "f")]);

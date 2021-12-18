@@ -59,11 +59,6 @@ let translate (globals, functions) =
   let printf_func : L.llvalue =
       L.declare_function "printf" printf_t the_module in
 
-  let printbig_t : L.lltype =
-      L.function_type i32_t [| i32_t |] in
-  let printbig_func : L.llvalue =
-      L.declare_function "printbig" printbig_t the_module in
-
   let draw_t : L.lltype =
       L.function_type i32_t [| i32_t |] in
   let draw_func : L.llvalue =
@@ -188,8 +183,6 @@ let translate (globals, functions) =
       | SCall ("print", [e]) | SCall ("printb", [e]) ->
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
-      | SCall ("printbig", [e]) ->
-	  L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | SCall ("draw", [e]) ->
 	  L.build_call draw_func [| (expr builder e) |] "draw" builder
       | SCall ("draw2", [e]) ->
