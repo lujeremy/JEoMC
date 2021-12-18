@@ -20,10 +20,12 @@
 #include <GL/glut.h>
 #endif
 
+/* Keep window, vao array, and an index as global variables */
 GLFWwindow* window;
 int vaoIndex = 0;
 GLuint vao_arr[50] = {0};
 
+/* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
 
     /* Initialize the library */
@@ -47,6 +49,8 @@ void jeomcInit() {
     return;
 }
 
+/* Use x, y, and f (offset) coordinates to create a Triangle's VAO
+   Insert vao into global array and increment index */
 void drawTriangle(double x, double y, double f) {
 
     float points[] = {
@@ -71,6 +75,7 @@ void drawTriangle(double x, double y, double f) {
     return;
 }
 
+/* Saves the current GLFW window to a given filepath */
 void saveImage(char *filepath, GLFWwindow *w){
     int width, height;
     glfwGetFramebufferSize(w,&width,&height);
@@ -86,6 +91,11 @@ void saveImage(char *filepath, GLFWwindow *w){
     stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
 }
 
+/* Sets up the opening of a window:
+    1. Creates the needed shaders
+    2. Iterates through global vao array using index to bind and render all the vertices
+    3. Saves window as an image to img.png
+ */
 void jeomcRunAndSave() {
     const char *vertex_shader =
       "#version 330\n"
