@@ -24,21 +24,6 @@ GLFWwindow* window;
 int vaoIndex = 0;
 GLuint vao_arr[50] = {0};
 
-void saveImage(char *filepath, GLFWwindow *w){
-    int width, height;
-    glfwGetFramebufferSize(w,&width,&height);
-    GLsizei nrChannels = 3;
-    GLsizei stride = nrChannels * width;
-    stride += (stride % 4) ? (4-stride % 4) : 0;
-    GLsizei bufferSize = stride * height;
-    char buffer[bufferSize];
-    glPixelStorei(GL_PACK_ALIGNMENT,4);
-    glReadBuffer(GL_BACK);
-    glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,buffer);
-    stbi_flip_vertically_on_write(1);
-    stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
-}
-
 void jeomcInit() {
 
     /* Initialize the library */
@@ -65,9 +50,9 @@ void jeomcInit() {
 void drawTriangle(double x, double y, double f) {
 
     float points[] = {
-      x, y+f, 0.0f,
-      x+f, y-f, 0.0f,
-      x-f, y-f, 0.0f,
+      x, y+f, 0.0d,
+      x+f, y-f, 0.0d,
+      x-f, y-f, 0.0d,
     };
 
     GLuint VBO1, VAO1, EBO;
@@ -84,6 +69,21 @@ void drawTriangle(double x, double y, double f) {
     vao_arr[vaoIndex] = VAO1;
     vaoIndex++;
     return;
+}
+
+void saveImage(char *filepath, GLFWwindow *w){
+    int width, height;
+    glfwGetFramebufferSize(w,&width,&height);
+    GLsizei nrChannels = 3;
+    GLsizei stride = nrChannels * width;
+    stride += (stride % 4) ? (4-stride % 4) : 0;
+    GLsizei bufferSize = stride * height;
+    char buffer[bufferSize];
+    glPixelStorei(GL_PACK_ALIGNMENT,4);
+    glReadBuffer(GL_BACK);
+    glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,buffer);
+    stbi_flip_vertically_on_write(1);
+    stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
 }
 
 void jeomcRunAndSave() {

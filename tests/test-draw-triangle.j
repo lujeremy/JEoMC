@@ -12,7 +12,7 @@ int main()
 
   drawTriangle(x, y, f);
   drawTriangle(-0.5, -0.5, 0.25);
-  drawTriangle(-0.5, 0.5, 0.25);
+  drawTriangle(-0.5, 0.5, 0.125);
 
   jeomcRunAndSave();
   return 0;
