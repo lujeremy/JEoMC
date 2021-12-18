@@ -31,6 +31,13 @@ void jeomcInit() {
     /* Initialize the library */
     if (!glfwInit())
         return;
+    
+#ifdef __APPLE__
+    glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR,2);
+    glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
+    glfwWindowHint (GLFW_OPEN_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+#endif
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "JEoMC", NULL, NULL);
