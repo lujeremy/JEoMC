@@ -32,7 +32,7 @@ let translate (globals, functions) =
   and i1_t       = L.i1_type     context
   and float_t    = L.double_type context
   and void_t     = L.void_type   context
-  and cnull      = L.const_null (L.i32_type context)in
+  and cnull      = L.const_null (L.i32_type context) in
 
   (* Return the LLVM type for a JEoMC type *)
   let ltype_of_typ = function
@@ -73,6 +73,21 @@ let translate (globals, functions) =
       L.function_type i32_t [| i32_t |] in
   let draw2_func : L.llvalue =
       L.declare_function "draw2" draw2_t the_module in
+
+  let drawTriangle_t : L.lltype =
+      L.function_type i32_t [| float_t; float_t; float_t |] in
+  let drawTriangle_func : L.llvalue =
+      L.declare_function "drawTriangle" drawTriangle_t the_module in
+
+  let jeomcInit_t : L.lltype =
+      L.function_type i32_t [| |] in
+  let jeomcInit_func : L.llvalue =
+      L.declare_function "jeomcInit" jeomcInit_t the_module in
+
+  let jeomcRunAndSave_t : L.lltype =
+      L.function_type i32_t [| |] in
+  let jeomcRunAndSave_func : L.llvalue =
+      L.declare_function "jeomcRunAndSave" jeomcRunAndSave_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -179,6 +194,12 @@ let translate (globals, functions) =
 	  L.build_call draw_func [| (expr builder e) |] "draw" builder
       | SCall ("draw2", [e]) ->
     L.build_call draw2_func [| (expr builder e) |] "draw2" builder
+      | SCall ("jeomcInit", []) ->
+    L.build_call jeomcInit_func [| |] "jeomcInit" builder
+      | SCall ("jeomcRunAndSave", []) ->
+    L.build_call jeomcRunAndSave_func [| |] "jeomcRunAndSave" builder
+      | SCall ("drawTriangle", [x;y;f]) ->
+    L.build_call drawTriangle_func [| (expr builder x); (expr builder y); (expr builder f) |] "drawTriangle" builder
       | SCall ("printf", [e]) ->
 	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder

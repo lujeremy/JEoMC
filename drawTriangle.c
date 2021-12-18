@@ -62,7 +62,7 @@ void jeomcInit() {
     return;
 }
 
-void drawTriangle(float x, float y, float f) {
+void drawTriangle(double x, double y, double f) {
 
     float points[] = {
       x, y+f, 0.0f,
@@ -143,9 +143,9 @@ int main(int argc, char *argv[]) {
 
   jeomcInit();
 
-  drawTriangle(0.5f, 0.5f, 0.25f);
-  drawTriangle(-0.5f, -0.5f, 0.25f);
-  drawTriangle(-0.5f, 0.5f, 0.5f);
+  drawTriangle(0.5d, 0.5d, 0.25d);
+  drawTriangle(-0.5d, -0.5d, 0.25d);
+  drawTriangle(-0.5d, 0.5d, 0.5d);
 
   jeomcRunAndSave();
 }

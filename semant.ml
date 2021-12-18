@@ -36,14 +36,18 @@ let check (globals, functions) =
     let add_bind map (name, ty) = StringMap.add name {
       typ = Void;
       fname = name; 
-      formals = [(ty, "x")];
+      formals = ty;
       locals = []; body = [] } map
-    in List.fold_left add_bind StringMap.empty [ ("print", Int);
-			                         ("printb", Bool);
-			                         ("printf", Float);
-			                         ("printbig", Int);
-			                         ("draw", Int);
-									 ("draw2", Int)]
+    in List.fold_left add_bind StringMap.empty [  ("print", [(Int, "x")]);
+                                                  ("printb", [(Bool, "x")]);
+                                                  ("printf", [(Float, "x")]);
+                                                  ("printbig", [(Int, "x")]);
+                                                  ("draw", [(Int, "x")]);
+                                                  ("draw2", [(Int, "x")]);
+                                                  ("drawTriangle", [(Float, "x"); (Float, "y"); (Float, "f")]);
+                                                  ("jeomcInit", [ ]);
+                                                  ("jeomcRunAndSave", [ ])
+                                                  ]
   in
 
   (* Add function name to symbol table *)
