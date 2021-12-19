@@ -20,10 +20,31 @@
 #include <GL/glut.h>
 #endif
 
+struct Shape {
+  GLuint vao;
+  int indices;
+  double r;
+  double g;
+  double b;
+  double a;
+};
+
 /* Keep window, vao array, and an index as global variables */
 GLFWwindow* window;
-int vaoIndex = 0;
-GLuint vao_arr[50] = {0};
+int shapeIndex = 0;
+struct Shape shape_arr[50] = {0};
+
+double active_r = 1.0;
+double active_g = 0.894;
+double active_b = 0.882;
+double active_a = 1.0;
+
+void setActiveColor(double r, double g, double b, double a) {
+  active_r = r;
+  active_g = g;
+  active_b = b;
+  active_a = a;
+}
 
 /* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
@@ -51,6 +72,10 @@ void jeomcInit() {
     glfwMakeContextCurrent(window);
     glClearColor( 0.1f, 0.1f, 0.1f, 0.0f );
 
+    /* Enable transparency */
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glewExperimental = GL_TRUE;
     glewInit();
     return;
@@ -61,24 +86,61 @@ void jeomcInit() {
 void drawTriangle(double x, double y, double f) {
 
     double points[] = {
-      x, y+f, 0.0,
-      x+f, y-f, 0.0,
-      x-f, y-f, 0.0,
+      x, y+f,
+      x+f, y-f,
+      x-f, y-f
     };
 
-    GLuint VBO1, VAO1, EBO;
+    GLuint VBO1, VAO1;
     glGenVertexArrays(1, &VAO1);
     glGenBuffers(1, &VBO1);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,3,GL_DOUBLE,GL_FALSE,0,NULL);
+    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);
 
-    vao_arr[vaoIndex] = VAO1;
-    vaoIndex++;
+    struct Shape s = {VAO1, 3, active_r, active_g, active_b, active_a};
+
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
+    return;
+}
+
+void drawRectangle(double x, double y, double h, double w) {
+
+    double points[] = {
+      x, y+h,
+      x+w, y+h,
+      x+w, y,
+      x, y
+    };
+
+    GLuint elements[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    GLuint VBO1, VAO1, ebo;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+
+    glGenBuffers(1, &ebo);
+
+    glBindVertexArray(VAO1);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+    struct Shape s = {VAO1, 6, active_r, active_g, active_b, active_a};
+
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
     return;
 }
 
@@ -141,9 +203,16 @@ void jeomcRunAndSave() {
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shader_programme);
 
-        for (int i = 0; i < vaoIndex; i++) {
-          glBindVertexArray(*(vao_arr + i));
-          glDrawArrays(GL_TRIANGLES, 0, 3);
+        for (int i = 0; i < shapeIndex; i++) {
+          struct Shape s = *(shape_arr + i);
+          glBindVertexArray(s.vao);
+          glColor4f( s.r, s.g, s.b, s.a );
+
+          if (s.indices == 3) {
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+          } else if (s.indices == 6) {
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+          }
         }
 
         /* Swap front and back buffers */
@@ -160,8 +229,15 @@ int main(int argc, char *argv[]) {
 
   jeomcInit();
 
+  // default
   drawTriangle(0.5, 0.5, 0.25);
-  drawTriangle(-0.5, -0.5, 0.25);
+
+  // blue
+  setActiveColor(0.686, 0.933, 0.933, 1.0);
+  drawRectangle(-0.5, -0.5, 0.25, 0.25);
+
+  // violet
+  setActiveColor(0.867, 0.627, 0.867, 1.0);
   drawTriangle(-0.5, 0.5, 0.5);
 
   jeomcRunAndSave();
