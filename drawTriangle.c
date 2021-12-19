@@ -74,7 +74,7 @@ void drawTriangle(double x, double y, double f) {
     glBindVertexArray(VAO1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,NULL);
+    glVertexAttribPointer(0,3,GL_DOUBLE,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);
 
     vao_arr[vaoIndex] = VAO1;
