@@ -4,6 +4,6 @@ true: package(llvm), package(llvm.analysis)
 # Enable almost all compiler warnings
 true : warn(+a-4)
 
-# Instruct ocamlbuild to ignore the "printbig.o" file when it's building
-"draw.o": not_hygienic
+# Instruct ocamlbuild to ignore the "drawTriangle.o" file when it's building
+"drawTriangle.o": not_hygienic
 
