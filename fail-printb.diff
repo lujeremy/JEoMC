@@ -1,0 +1,4 @@
+1c1
+< Fatal error: exception Failure("unrecognized function main")
+---
+> Fatal error: exception Failure("function printb may not be defined")
