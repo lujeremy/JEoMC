@@ -23,6 +23,9 @@
 struct Shape {
   GLuint vao;
   int indices;
+  double x;
+  double y;
+  double radius;
   double r;
   double g;
   double b;
@@ -101,10 +104,36 @@ void drawTriangle(double x, double y, double f) {
     glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);
 
-    struct Shape s = {VAO1, 3, active_r, active_g, active_b, active_a};
+    struct Shape s = {VAO1, 3, 0, 0, 0, active_r, active_g, active_b, active_a};
 
     shape_arr[shapeIndex] = s;
     shapeIndex++;
+    return;
+}
+
+void drawCircle(double x, double y, double radius){
+    struct Shape s = {0, 0, x, y, radius, active_r, active_g, active_b, active_a};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
+    return;
+}
+
+void drawQueuedCircle(double x, double y, double radius) {
+    int i;
+    int triangleAmount = 30; //# of triangles used to draw circle
+
+    //GLfloat radius = 0.8f; //radius
+    GLfloat twicePi = 2.0f * M_PI;
+
+    glBegin(GL_TRIANGLE_FAN);
+      glVertex2f(x, y); // center of circle
+      for(i = 0; i <= triangleAmount;i++) {
+        glVertex2f(
+                  x + (radius * cos(i *  twicePi / triangleAmount)),
+            y + (radius * sin(i * twicePi / triangleAmount))
+        );
+      }
+    glEnd();
     return;
 }
 
@@ -137,7 +166,7 @@ void drawRectangle(double x, double y, double h, double w) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
-    struct Shape s = {VAO1, 6, active_r, active_g, active_b, active_a};
+    struct Shape s = {VAO1, 6, 0, 0, 0, active_r, active_g, active_b, active_a};
 
     shape_arr[shapeIndex] = s;
     shapeIndex++;
@@ -158,6 +187,8 @@ void saveImage(char *filepath, GLFWwindow *w){
     glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,buffer);
     stbi_flip_vertically_on_write(1);
     stbi_write_png(filepath,width,height,nrChannels,buffer,stride);
+
+    return;
 }
 
 /* Sets up the opening of a window:
@@ -166,26 +197,38 @@ void saveImage(char *filepath, GLFWwindow *w){
     3. Saves window as an image to img.png
  */
 void jeomcRunAndSave() {
-    const char *vertex_shader =
-      "#version 330\n"
-      "in vec3 vp;"
-      "void main() {"
-      "    gl_Position = vec4(vp,1.0);"
-      "    gl_PointSize = 10.0;"
-      "}";
-
-    const char *fragment_shader =
-      "#version 330\n"
-      "out vec4 frag_colour;"
-      "void main() {"
-      "    frag_colour = vec4(1.0,0.0,0.0,0.0);"
-      "}";
+    // Shader sources
+    const GLchar* vertexSource = R"glsl(
+        attribute vec2 value;
+        uniform mat4 viewMatrix;
+        uniform mat4 projectionMatrix;
+        varying vec2 val;
+        void main() {
+            val = value;
+            gl_Position = projectionMatrix*viewMatrix*vertex;
+        }
+    )glsl";
+    const GLchar* fragmentSource = R"glsl(
+        varying vec2 val;
+        void main() {
+            float R = 1.0;
+            float R2 = 0.5;
+            float dist = sqrt(dot(val,val));
+            if (dist >= R || dist <= R2) {
+                discard;
+            }
+            float sm = smoothstep(R,R-0.01,dist);
+            float sm2 = smoothstep(R2,R2+0.01,dist);
+            float alpha = sm*sm2;
+            gl_FragColor = vec4(0.0, 0.0, 1.0, alpha);
+        }
+    )glsl";
 
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vertex_shader,NULL);
+    glShaderSource(vs,1,&vertexSource,NULL);
     glCompileShader(vs);
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&fragment_shader,NULL);
+    glShaderSource(fs,1,&fragmentSource,NULL);
     glCompileShader(fs);
 
     GLuint shader_programme = glCreateProgram();
@@ -205,12 +248,18 @@ void jeomcRunAndSave() {
 
         for (int i = 0; i < shapeIndex; i++) {
           struct Shape s = *(shape_arr + i);
-          glBindVertexArray(s.vao);
           glColor4f( s.r, s.g, s.b, s.a );
 
-          if (s.indices == 3) {
+          // Draw circles
+          if (s.indices == 0) {
+            drawQueuedCircle(s.x, s.y, s.radius);
+          // Draw Triangles
+          } else if (s.indices == 3) {
+            glBindVertexArray(s.vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
+          // Draw Rectangles
           } else if (s.indices == 6) {
+            glBindVertexArray(s.vao);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
           }
         }
@@ -238,7 +287,7 @@ int main(int argc, char *argv[]) {
 
   // violet
   setActiveColor(0.867, 0.627, 0.867, 1.0);
-  drawTriangle(-0.5, 0.5, 0.5);
+  drawCircle(0.0, 0.0, 0.25);
 
   jeomcRunAndSave();
 }
