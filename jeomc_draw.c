@@ -20,6 +20,7 @@
 #include <GL/glut.h>
 #endif
 
+/* General shape struct to track rgba, Triangle/Rectangle's vao, and Circle's x,y,radius */
 struct Shape {
   GLuint vao;
   int indices;
@@ -32,16 +33,21 @@ struct Shape {
   double a;
 };
 
-/* Keep window, vao array, and an index as global variables */
+/* Keep window, shape, and an index as global variables
+   Shape array will be used as a queue to add shapes to be drawn.
+   When user runs jeomcRunAndSave, all queued shapes in array will be rendered accordingly */
 GLFWwindow* window;
 int shapeIndex = 0;
 struct Shape shape_arr[50] = {0};
 
+/* Active rgba values are kept and saved into each shape when they are queued
+   This allows for each shape to have a separate rbga value */
 double active_r = 1.0;
 double active_g = 0.894;
 double active_b = 0.882;
 double active_a = 1.0;
 
+/* Change active rgba values to new ones */
 void setActiveColor(double r, double g, double b, double a) {
   active_r = r;
   active_g = g;
@@ -111,6 +117,7 @@ void drawTriangle(double x, double y, double f) {
     return;
 }
 
+/* Queues a circle to be drawn with x and y center point and radius*/
 void drawCircle(double x, double y, double radius){
     struct Shape s = {0, 0, x, y, radius, active_r, active_g, active_b, active_a};
     shape_arr[shapeIndex] = s;
@@ -118,11 +125,11 @@ void drawCircle(double x, double y, double radius){
     return;
 }
 
+/* Actually draws a queued circle using many triangles */
 void drawQueuedCircle(double x, double y, double radius) {
     int i;
     int triangleAmount = 30; //# of triangles used to draw circle
 
-    //GLfloat radius = 0.8f; //radius
     GLfloat twicePi = 2.0f * M_PI;
 
     glBegin(GL_TRIANGLE_FAN);
@@ -137,6 +144,10 @@ void drawQueuedCircle(double x, double y, double radius) {
     return;
 }
 
+/* Draws a rectangle with x and y as the bottom left point and h height, w width
+   We use element buffers and drawElement instead to simplify the number of points
+   needed (otherwise we would need to pass in 6 points for the 2 triangles).
+*/
 void drawRectangle(double x, double y, double h, double w) {
 
     double points[] = {
@@ -198,43 +209,43 @@ void saveImage(char *filepath, GLFWwindow *w){
  */
 void jeomcRunAndSave() {
     // Shader sources
-    const GLchar* vertexSource = R"glsl(
-        attribute vec2 value;
-        uniform mat4 viewMatrix;
-        uniform mat4 projectionMatrix;
-        varying vec2 val;
-        void main() {
-            val = value;
-            gl_Position = projectionMatrix*viewMatrix*vertex;
-        }
-    )glsl";
-    const GLchar* fragmentSource = R"glsl(
-        varying vec2 val;
-        void main() {
-            float R = 1.0;
-            float R2 = 0.5;
-            float dist = sqrt(dot(val,val));
-            if (dist >= R || dist <= R2) {
-                discard;
-            }
-            float sm = smoothstep(R,R-0.01,dist);
-            float sm2 = smoothstep(R2,R2+0.01,dist);
-            float alpha = sm*sm2;
-            gl_FragColor = vec4(0.0, 0.0, 1.0, alpha);
-        }
-    )glsl";
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vertexSource,NULL);
-    glCompileShader(vs);
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&fragmentSource,NULL);
-    glCompileShader(fs);
-
-    GLuint shader_programme = glCreateProgram();
-    glAttachShader(shader_programme,fs);
-    glAttachShader(shader_programme,vs);
-    glLinkProgram(shader_programme);
+//    const GLchar* vertexSource = R"glsl(
+//        attribute vec2 value;
+//        uniform mat4 viewMatrix;
+//        uniform mat4 projectionMatrix;
+//        varying vec2 val;
+//        void main() {
+//            val = value;
+//            gl_Position = projectionMatrix*viewMatrix*vertex;
+//        }
+//    )glsl";
+//    const GLchar* fragmentSource = R"glsl(
+//        varying vec2 val;
+//        void main() {
+//            float R = 1.0;
+//            float R2 = 0.5;
+//            float dist = sqrt(dot(val,val));
+//            if (dist >= R || dist <= R2) {
+//                discard;
+//            }
+//            float sm = smoothstep(R,R-0.01,dist);
+//            float sm2 = smoothstep(R2,R2+0.01,dist);
+//            float alpha = sm*sm2;
+//            gl_FragColor = vec4(0.0, 0.0, 1.0, alpha);
+//        }
+//    )glsl";
+//
+//    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+//    glShaderSource(vs,1,&vertexSource,NULL);
+//    glCompileShader(vs);
+//    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+//    glShaderSource(fs,1,&fragmentSource,NULL);
+//    glCompileShader(fs);
+//
+//    GLuint shader_programme = glCreateProgram();
+//    glAttachShader(shader_programme,fs);
+//    glAttachShader(shader_programme,vs);
+//    glLinkProgram(shader_programme);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -244,7 +255,7 @@ void jeomcRunAndSave() {
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shader_programme);
+//        glUseProgram(shader_programme);
 
         for (int i = 0; i < shapeIndex; i++) {
           struct Shape s = *(shape_arr + i);

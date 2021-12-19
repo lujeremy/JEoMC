@@ -74,6 +74,21 @@ let translate (globals, functions) =
   let drawTriangle_func : L.llvalue =
       L.declare_function "drawTriangle" drawTriangle_t the_module in
 
+  let drawCircle_t : L.lltype =
+      L.function_type i32_t [| float_t; float_t; float_t |] in
+  let drawCircle_func : L.llvalue =
+      L.declare_function "drawCircle" drawCircle_t the_module in
+
+  let drawRectangle_t : L.lltype =
+      L.function_type i32_t [| float_t; float_t; float_t; float_t |] in
+  let drawRectangle_func : L.llvalue =
+      L.declare_function "drawRectangle" drawRectangle_t the_module in
+
+  let setActiveColor_t : L.lltype =
+      L.function_type i32_t [| float_t; float_t; float_t; float_t |] in
+  let setActiveColor_func : L.llvalue =
+      L.declare_function "setActiveColor" setActiveColor_t the_module in
+
   let jeomcInit_t : L.lltype =
       L.function_type i32_t [| |] in
   let jeomcInit_func : L.llvalue =
@@ -193,6 +208,12 @@ let translate (globals, functions) =
     L.build_call jeomcRunAndSave_func [| |] "jeomcRunAndSave" builder
       | SCall ("drawTriangle", [x;y;f]) ->
     L.build_call drawTriangle_func [| (expr builder x); (expr builder y); (expr builder f) |] "drawTriangle" builder
+      | SCall ("drawCircle", [x;y;radius]) ->
+    L.build_call drawCircle_func [| (expr builder x); (expr builder y); (expr builder radius) |] "drawCircle" builder
+      | SCall ("drawRectangle", [x;y;w;h]) ->
+    L.build_call drawRectangle_func [| (expr builder x); (expr builder y); (expr builder w); (expr builder h) |] "drawRectangle" builder
+      | SCall ("setActiveColor", [r;g;b;a]) ->
+    L.build_call setActiveColor_func [| (expr builder r); (expr builder g); (expr builder b); (expr builder a) |] "setActiveColor" builder
       | SCall ("printf", [e]) ->
 	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder
