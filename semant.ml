@@ -36,14 +36,20 @@ let check (globals, functions) =
     let add_bind map (name, ty) = StringMap.add name {
       typ = Void;
       fname = name; 
-      formals = [(ty, "x")];
+      formals = ty;
       locals = []; body = [] } map
-    in List.fold_left add_bind StringMap.empty [ ("print", Int);
-			                         ("printb", Bool);
-			                         ("printf", Float);
-			                         ("printbig", Int);
-			                         ("draw", Int);
-									 ("draw2", Int)]
+    in List.fold_left add_bind StringMap.empty [  ("print", [(Int, "x")]);
+                                                  ("printb", [(Bool, "x")]);
+                                                  ("printf", [(Float, "x")]);
+                                                  ("draw", [(Int, "x")]);
+                                                  ("draw2", [(Int, "x")]);
+                                                  ("drawTriangle", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "x3"); (Float, "y3"); (Float, "r"); (Float, "g"); (Float, "b");]);
+                                                  ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius"); (Float, "r"); (Float, "g"); (Float, "b");]);
+                                                  ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h"); (Float, "r"); (Float, "g"); (Float, "b");]);
+                                                  ("setActiveColor", [(Float, "r"); (Float, "g"); (Float, "b"); (Float, "a")]);
+                                                  ("jeomcInit", [ ]);
+                                                  ("jeomcRunAndSave", [ ])
+                                                  ]
   in
 
   (* Add function name to symbol table *)
@@ -161,6 +167,8 @@ let check (globals, functions) =
       | For(e1, e2, e3, st) ->
 	  SFor(expr e1, check_bool_expr e2, expr e3, check_stmt st)
       | While(p, s) -> SWhile(check_bool_expr p, check_stmt s)
+	  | Break -> SBreak
+	  | Continue -> SContinue
       | Return e -> let (t, e') = expr e in
         if t = func.typ then SReturn (t, e') 
         else raise (
@@ -173,6 +181,10 @@ let check (globals, functions) =
           let rec check_stmt_list = function
               [Return _ as s] -> [check_stmt s]
             | Return _ :: _   -> raise (Failure "nothing may follow a return")
+			| [Break as s] -> [check_stmt s]
+			| Break :: _   -> raise (Failure "nothing may follow a break")
+			| [Continue as s] -> [check_stmt s]
+			| Continue :: _   -> raise (Failure "nothing may follow a continue")
             | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)
             | s :: ss         -> check_stmt s :: check_stmt_list ss
             | []              -> []
