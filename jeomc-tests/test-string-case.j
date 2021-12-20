@@ -2,9 +2,12 @@ int main(){
     string j;
     string k;
     string l;
-    j = "abc";
-    k = "abc";
-    l = "ab";
+    string m;
+
+    j = "FOO";
+    k = "foo";
+    l = "FoO";
+    m = "foo";
 
     if (j == k) {
       print(1);
@@ -14,8 +17,16 @@ int main(){
       print(2);
     }
 
-    if (k == l) {
+    if (j == m) {
       print(3);
+    }
+
+    if (k == l) {
+      print(4);
+    }
+
+    if (k == m) {
+      print(5);
     }
 
     return 0;
