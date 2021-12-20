@@ -44,9 +44,6 @@ let check (globals, functions) =
                                                   ("draw", [(Int, "x")]);
                                                   ("draw2", [(Int, "x")]);
                                                   ("drawTriangle", [(Float, "x"); (Float, "y"); (Float, "f")]);
-                                                  ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius")]);
-                                                  ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h")]);
-                                                  ("setActiveColor", [(Float, "r"); (Float, "g"); (Float, "b"); (Float, "a")]);
                                                   ("jeomcInit", [ ]);
                                                   ("jeomcRunAndSave", [ ])
                                                   ]
@@ -101,7 +98,8 @@ let check (globals, functions) =
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec expr = function
         Literal  l -> (Int, SLiteral l)
-      | Fliteral l -> (Float, SFliteral l)
+      | Slit l -> (String, SSlit l)
+      | Flit l -> (Float, SFlit l)
       | BoolLit l  -> (Bool, SBoolLit l)
       | Noexpr     -> (Void, SNoexpr)
       | Id s       -> (type_of_identifier s, SId s)
