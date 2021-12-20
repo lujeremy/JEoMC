@@ -30,6 +30,7 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
+  and string_t   = L.pointer_type (L.i8_type context)
   and float_t    = L.double_type context
   and void_t     = L.void_type   context
   and cnull      = L.const_null (L.i32_type context) in
@@ -37,6 +38,7 @@ let translate (globals, functions) =
   (* Return the LLVM type for a JEoMC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
+    | A.String -> string_t
     | A.Bool  -> i1_t
     | A.Float -> float_t
     | A.Void  -> void_t
@@ -74,21 +76,6 @@ let translate (globals, functions) =
   let drawTriangle_func : L.llvalue =
       L.declare_function "drawTriangle" drawTriangle_t the_module in
 
-  let drawCircle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t |] in
-  let drawCircle_func : L.llvalue =
-      L.declare_function "drawCircle" drawCircle_t the_module in
-
-  let drawRectangle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t |] in
-  let drawRectangle_func : L.llvalue =
-      L.declare_function "drawRectangle" drawRectangle_t the_module in
-
-  let setActiveColor_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t |] in
-  let setActiveColor_func : L.llvalue =
-      L.declare_function "setActiveColor" setActiveColor_t the_module in
-
   let jeomcInit_t : L.lltype =
       L.function_type i32_t [| |] in
   let jeomcInit_func : L.llvalue =
@@ -116,7 +103,8 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
-    and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder in
+    and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder
+    and str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
 
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -148,9 +136,10 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder ((_, e) : sexpr) = match e with
-	SLiteral i  -> L.const_int i32_t i
+	   SLiteral i  -> L.const_int i32_t i
       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
-      | SFliteral l -> L.const_float_of_string float_t l
+      | SFlit l -> L.const_float_of_string float_t l
+      | SSlit s     -> L.build_global_stringptr (s ^ "\x00") "str" builder
       | SNoexpr     -> L.const_int i32_t 0
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = expr builder e in
@@ -179,7 +168,7 @@ let translate (globals, functions) =
 	    A.Add     -> L.build_add
 	  | A.Sub     -> L.build_sub
 	  | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
+    | A.Div     -> L.build_sdiv
 	  | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
 	  | A.Equal   -> L.build_icmp L.Icmp.Eq
@@ -208,12 +197,6 @@ let translate (globals, functions) =
     L.build_call jeomcRunAndSave_func [| |] "jeomcRunAndSave" builder
       | SCall ("drawTriangle", [x;y;f]) ->
     L.build_call drawTriangle_func [| (expr builder x); (expr builder y); (expr builder f) |] "drawTriangle" builder
-      | SCall ("drawCircle", [x;y;radius]) ->
-    L.build_call drawCircle_func [| (expr builder x); (expr builder y); (expr builder radius) |] "drawCircle" builder
-      | SCall ("drawRectangle", [x;y;w;h]) ->
-    L.build_call drawRectangle_func [| (expr builder x); (expr builder y); (expr builder w); (expr builder h) |] "drawRectangle" builder
-      | SCall ("setActiveColor", [r;g;b;a]) ->
-    L.build_call setActiveColor_func [| (expr builder r); (expr builder g); (expr builder b); (expr builder a) |] "setActiveColor" builder
       | SCall ("printf", [e]) ->
 	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder
