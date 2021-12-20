@@ -202,6 +202,8 @@ let translate (globals, functions) =
       | SCall ("print", [e]) | SCall ("printb", [e]) ->
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
+      | SCall ("prints", [e]) ->
+    L.build_call printf_func [| str_format_str ; (expr builder e) |] "printf" builder
       | SCall ("draw", [e]) ->
 	  L.build_call draw_func [| (expr builder e) |] "draw" builder
       | SCall ("draw2", [e]) ->
