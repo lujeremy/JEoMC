@@ -44,9 +44,9 @@ let check (globals, functions) =
                                                   ("prints", [(String, "x")]);
                                                   ("draw", [(Int, "x")]);
                                                   ("draw2", [(Int, "x")]);
-                                                  ("drawTriangle", [(Float, "x"); (Float, "y"); (Float, "f")]);
-                                                  ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius")]);
-                                                  ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h")]);
+                                                  ("drawTriangle", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "x3"); (Float, "y3"); (Float, "r"); (Float, "g"); (Float, "b");]);
+                                                  ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius"); (Float, "r"); (Float, "g"); (Float, "b");]);
+                                                  ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h"); (Float, "r"); (Float, "g"); (Float, "b");]);
                                                   ("setActiveColor", [(Float, "r"); (Float, "g"); (Float, "b"); (Float, "a")]);
                                                   ("jeomcInit", [ ]);
                                                   ("jeomcRunAndSave", [ ])

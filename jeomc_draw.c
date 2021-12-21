@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include "stb_image_write.h"
 #include <stdio.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 /* MacOS imports */
 #if __has_include(<OpenGL/gl.h>)
@@ -19,6 +21,11 @@
 #if __has_include(<GL/glut.h>)
 #include <GL/glut.h>
 #endif
+
+/* Keep window, vao array, and an index as global variables */
+GLFWwindow* window;
+int vaoIndex = 0;
+GLuint vao_arr[50] = {0};
 
 /* General shape struct to track rgba, Triangle/Rectangle's vao, and Circle's x,y,radius */
 struct Shape {
@@ -70,7 +77,7 @@ void jeomcInit() {
 #endif
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "JEoMC", NULL, NULL);
+    window = glfwCreateWindow(640, 640, "JEoMC", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -84,6 +91,7 @@ void jeomcInit() {
     /* Enable transparency */
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_COLOR_MATERIAL);
 
     glewExperimental = GL_TRUE;
     glewInit();
@@ -92,7 +100,7 @@ void jeomcInit() {
 
 /* Use x, y, and f (offset) coordinates to create a Triangle's VAO
    Insert vao into global array and increment index */
-void drawTriangle(double x, double y, double f) {
+void drawTriangleOffset(double x, double y, double f) {
 
     double points[] = {
       x, y+f,
@@ -107,8 +115,9 @@ void drawTriangle(double x, double y, double f) {
     glBindVertexArray(VAO1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
+    
 
     struct Shape s = {VAO1, 3, 0, 0, 0, active_r, active_g, active_b, active_a};
 
@@ -117,8 +126,147 @@ void drawTriangle(double x, double y, double f) {
     return;
 }
 
+void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3,
+    double r, double g, double b) {
+
+    double points[] = {
+      x1, y1, 0.0, 0.583,  0.771,  0.014,
+      x2, y2, 0.0, 0.609,  0.115,  0.436,
+      x3, y3, 0.0, 0.327,  0.483,  0.844
+    };
+
+    GLuint VBO1, VAO1, EBO;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO1);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+
+
+    vao_arr[vaoIndex] = VAO1;
+    vaoIndex++;
+
+    const char* vertexSource =
+      "#version 330\n"
+      "layout (location = 0) in vec3 vp;    // Position in attribute location 0\n"
+      "layout (location = 1) in vec3 vc;  // Color in attribute location 1\n"
+      "out vec3 theColor;                 // output a color to the fragment shader\n"
+      "void main() {"
+      "    gl_Position = vec4(vp,1.0);"
+      "    theColor = vc;\n"
+      "}";
+
+    const char* fragmentSource =
+      "#version 330\n"
+      "in vec3 theColor;      // Color value came from the vertex shader (smoothed) \n"
+      "out vec4 FragColor;    // Color that will be used for the fragment\n"
+      "void main() {"
+      "    FragColor = vec4(theColor, 1.0f);"
+      "}";
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs,1,&vertexSource,NULL);
+    glCompileShader(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs,1,&fragmentSource,NULL);
+    glCompileShader(fs);
+
+    GLuint shader_programme = glCreateProgram();
+    glAttachShader(shader_programme,fs);
+    glAttachShader(shader_programme,vs);
+    glLinkProgram(shader_programme);
+    glUseProgram(shader_programme);
+    glfwSwapBuffers(window);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glfwSwapBuffers(window);
+    return;
+}
+
+void drawCircle(double centerx, double centery,double rad,
+    double r, double g, double b){
+    int theta = 0;
+    double x;
+    double y;
+    double z = 0.0;
+    int numPoints = 30;
+    int currentSize = 0;
+    double points[numPoints*3];
+
+    while (theta<360){
+        x = (double) rad * cos(theta * M_PI / 180.0);
+        y = (double) rad * sin(theta * M_PI / 180.0);
+
+        points[currentSize++] = x + centerx;
+        points[currentSize++] = y + centery;
+        points[currentSize++] = z;
+
+        theta+=(360/numPoints);
+
+    }
+
+    GLuint VBO1, VAO1;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+
+    glBindVertexArray(VAO1);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,3,GL_DOUBLE,GL_FALSE,0,NULL);
+
+    struct Shape s = {VAO1, numPoints, 0, 0, 0, active_r, active_g, active_b, active_a};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
+
+    const char* vertexSource =
+       "#version 330\n"
+       "in vec3 vp;"
+       "void main() {"
+       "    gl_Position = vec4(vp,1.0);"
+       "}";
+
+    const char* fragmentSource;
+    char buf[256];
+    sprintf(buf,"#version 330\n"
+                "out vec4 frag_colour;"
+                "void main() {"
+                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
+                "}",r,g,b,1.0);
+
+    fragmentSource = buf;
+
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs,1,&vertexSource,NULL);
+    glCompileShader(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs,1,&fragmentSource,NULL);
+    glCompileShader(fs);
+
+    GLuint shader_programme = glCreateProgram();
+    glAttachShader(shader_programme,fs);
+    glAttachShader(shader_programme,vs);
+    glLinkProgram(shader_programme);
+    glUseProgram(shader_programme);
+
+    
+    glfwSwapBuffers(window);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
+    glfwSwapBuffers(window);
+    return;
+    
+}
+
 /* Queues a circle to be drawn with x and y center point and radius*/
-void drawCircle(double x, double y, double radius){
+void drawCircleLinux(double x, double y, double radius){
     struct Shape s = {0, 0, x, y, radius, active_r, active_g, active_b, active_a};
     shape_arr[shapeIndex] = s;
     shapeIndex++;
@@ -148,7 +296,8 @@ void drawQueuedCircle(double x, double y, double radius) {
    We use element buffers and drawElement instead to simplify the number of points
    needed (otherwise we would need to pass in 6 points for the 2 triangles).
 */
-void drawRectangle(double x, double y, double h, double w) {
+void drawRectangle(double x, double y, double h, double w,
+    double r, double g, double b) {
 
     double points[] = {
       x, y+h,
@@ -181,7 +330,103 @@ void drawRectangle(double x, double y, double h, double w) {
 
     shape_arr[shapeIndex] = s;
     shapeIndex++;
+
+    const char* vertexSource =
+       "#version 330\n"
+       "in vec3 vp;"
+       "void main() {"
+       "    gl_Position = vec4(vp,1.0);"
+       "}";
+
+    const char* fragmentSource;
+    char buf[256];
+    sprintf(buf,"#version 330\n"
+                "out vec4 frag_colour;"
+                "void main() {"
+                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
+                "}",r,g,b,1.0);
+
+    fragmentSource = buf;
+
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs,1,&vertexSource,NULL);
+    glCompileShader(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs,1,&fragmentSource,NULL);
+    glCompileShader(fs);
+
+    GLuint shader_programme = glCreateProgram();
+    glAttachShader(shader_programme,fs);
+    glAttachShader(shader_programme,vs);
+    glLinkProgram(shader_programme);
+    glUseProgram(shader_programme);
+
+    
+    glfwSwapBuffers(window);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glfwSwapBuffers(window);
     return;
+}
+
+void drawLine(double startx, double starty, double endx, double endy,
+    double r, double g, double b){
+    double points[] = {
+        startx, starty,
+        endx, endy
+    };
+
+    GLuint VBO1, VAO1;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+
+    glBindVertexArray(VAO1);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
+    glLineWidth(2);
+
+    struct Shape s = {VAO1, 4, 0, 0, 0, active_r, active_g, active_b, active_a};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
+
+    const char* vertexSource =
+       "#version 330\n"
+       "in vec3 vp;"
+       "void main() {"
+       "    gl_Position = vec4(vp,1.0);"
+       "}";
+
+    const char* fragmentSource;
+    char buf[256];
+    sprintf(buf,"#version 330\n"
+                "out vec4 frag_colour;"
+                "void main() {"
+                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
+                "}",r,g,b,1.0);
+
+    fragmentSource = buf;
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs,1,&vertexSource,NULL);
+    glCompileShader(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs,1,&fragmentSource,NULL);
+    glCompileShader(fs);
+
+    GLuint shader_programme = glCreateProgram();
+    glAttachShader(shader_programme,fs);
+    glAttachShader(shader_programme,vs);
+    glLinkProgram(shader_programme);
+    glUseProgram(shader_programme);
+
+    
+    glfwSwapBuffers(window);
+
+    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    glDrawArrays(GL_LINES, 0, 2);
+    glfwSwapBuffers(window);
 }
 
 /* Saves the current GLFW window to a given filepath */
@@ -202,50 +447,14 @@ void saveImage(char *filepath, GLFWwindow *w){
     return;
 }
 
+
+
 /* Sets up the opening of a window:
     1. Creates the needed shaders
     2. Iterates through global vao array using index to bind and render all the vertices
     3. Saves window as an image to img.png
  */
 void jeomcRunAndSave() {
-    // Shader sources
-//    const GLchar* vertexSource = R"glsl(
-//        attribute vec2 value;
-//        uniform mat4 viewMatrix;
-//        uniform mat4 projectionMatrix;
-//        varying vec2 val;
-//        void main() {
-//            val = value;
-//            gl_Position = projectionMatrix*viewMatrix*vertex;
-//        }
-//    )glsl";
-//    const GLchar* fragmentSource = R"glsl(
-//        varying vec2 val;
-//        void main() {
-//            float R = 1.0;
-//            float R2 = 0.5;
-//            float dist = sqrt(dot(val,val));
-//            if (dist >= R || dist <= R2) {
-//                discard;
-//            }
-//            float sm = smoothstep(R,R-0.01,dist);
-//            float sm2 = smoothstep(R2,R2+0.01,dist);
-//            float alpha = sm*sm2;
-//            gl_FragColor = vec4(0.0, 0.0, 1.0, alpha);
-//        }
-//    )glsl";
-//
-//    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-//    glShaderSource(vs,1,&vertexSource,NULL);
-//    glCompileShader(vs);
-//    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-//    glShaderSource(fs,1,&fragmentSource,NULL);
-//    glCompileShader(fs);
-//
-//    GLuint shader_programme = glCreateProgram();
-//    glAttachShader(shader_programme,fs);
-//    glAttachShader(shader_programme,vs);
-//    glLinkProgram(shader_programme);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -254,29 +463,25 @@ void jeomcRunAndSave() {
         glfwPollEvents();
 
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-//        glUseProgram(shader_programme);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < shapeIndex; i++) {
-          struct Shape s = *(shape_arr + i);
-          glColor4f( s.r, s.g, s.b, s.a );
+//        for (int i = 0; i < shapeIndex; i++) {
+//            struct Shape s = *(shape_arr + i);
+//
+//            // Draw circles
+//            if (s.indices > 10) {
+//                glBindVertexArray(s.vao);
+//                glDrawArrays(GL_TRIANGLE_FAN,0,30);
+//          // Draw Triangles
+//            } else if (s.indices == 3) {
+//                glBindVertexArray(s.vao);
+//                glDrawArrays(GL_TRIANGLES, 0, 3);
+//          // Draw Rectangles
+//            } else if (s.indices == 6) {
+//                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//            }
+//        }
 
-          // Draw circles
-          if (s.indices == 0) {
-            drawQueuedCircle(s.x, s.y, s.radius);
-          // Draw Triangles
-          } else if (s.indices == 3) {
-            glBindVertexArray(s.vao);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-          // Draw Rectangles
-          } else if (s.indices == 6) {
-            glBindVertexArray(s.vao);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-          }
-        }
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
     }
 
     saveImage("img.png", window);
@@ -289,16 +494,24 @@ int main(int argc, char *argv[]) {
 
   jeomcInit();
 
-  // default
-  drawTriangle(0.5, 0.5, 0.25);
+  drawCircle(0.0, -0.5, 0.4,1.0,1.0,1.0);
+  drawCircle(0.0, 0.1, 0.30,1.0,1.0,1.0);
+  drawCircle(0.0, 0.6, 0.20,1.0,1.0,1.0);
 
-  // blue
-  setActiveColor(0.686, 0.933, 0.933, 1.0);
-  drawRectangle(-0.5, -0.5, 0.25, 0.25);
+  drawRectangle(-0.25,0.32,0.15,0.5,1.0,0.0,0.0);
 
-  // violet
-  setActiveColor(0.867, 0.627, 0.867, 1.0);
-  drawCircle(0.0, 0.0, 0.25);
+  drawCircle(-0.08,0.65,0.03,0.0,0.0,0.0);
+  drawCircle(0.08,0.65,0.03,0.0,0.0,0.0);
+
+  drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
+
+  
+  drawCircle(0.0, 0.1, 0.03,0.0,0.0,0.0);
+  drawCircle(0.0, -0.1, 0.03,0.0,0.0,0.0);
+  drawCircle(0.0, -0.3, 0.03,0.0,0.0,0.0);
+
+  drawLine(-0.75,0.55,-0.18,0.3,0.5,0.25,0.0);
+  drawLine(0.75,0.55,0.18,0.3,0.5,0.25,0.0);
 
   jeomcRunAndSave();
 }
