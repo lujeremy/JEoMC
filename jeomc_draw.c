@@ -387,8 +387,6 @@ void drawLine(double startx, double starty, double endx, double endy,
     shape_arr[shapeIndex] = s;
     shapeIndex++;
 
-
-
     const char* vertexSource =
        "#version 330\n"
        "in vec3 vp;"
@@ -405,7 +403,6 @@ void drawLine(double startx, double starty, double endx, double endy,
                 "}",r,g,b,1.0);
 
     fragmentSource = buf;
-
 
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs,1,&vertexSource,NULL);
@@ -501,7 +498,7 @@ int main(int argc, char *argv[]) {
   drawCircle(-0.08,0.65,0.03,0.0,0.0,0.0);
   drawCircle(0.08,0.65,0.03,0.0,0.0,0.0);
 
-  drawTriangleCoords(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
+  drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
 
   
   drawCircle(0.0, 0.1, 0.03,0.0,0.0,0.0);
