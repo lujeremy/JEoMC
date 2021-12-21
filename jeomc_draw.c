@@ -118,8 +118,14 @@ void bindElementBuffer() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }
 
-void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3,
-    double r, double g, double b) {
+void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3, char hex[]) {
+    if (hex[0] == '#')
+      hex++;
+    int num = (int) strtol(hex, NULL, 16);
+    double r = ((num >> 16) & 0xFF) / 255.0;
+    double g = ((num >> 8) & 0xFF) / 255.0;
+    double b = (num & 0xFF) / 255.0;
+    printf("%lf %lf %lf\n", r, g, b);
 
     double points[] = {
       x1, y1, 0.0, r, g, b,
@@ -142,8 +148,15 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     return;
 }
 
-void drawCircle(double centerx, double centery,double rad,
-    double r, double g, double b){
+void drawCircle(double centerx, double centery,double rad, char hex[]){
+    if (hex[0] == '#')
+      hex++;
+    int num = (int) strtol(hex, NULL, 16);
+    double r = ((num >> 16) & 0xFF) / 255.0;
+    double g = ((num >> 8) & 0xFF) / 255.0;
+    double b = (num & 0xFF) / 255.0;
+    printf("%lf %lf %lf\n", r, g, b);
+
     int theta = 0;
     double x;
     double y;
@@ -187,8 +200,14 @@ void drawCircle(double centerx, double centery,double rad,
    We use element buffers and drawElement instead to simplify the number of points
    needed (otherwise we would need to pass in 6 points for the 2 triangles).
 */
-void drawRectangle(double x, double y, double h, double w,
-    double r, double g, double b) {
+void drawRectangle(double x, double y, double h, double w, char hex[]) {
+    if (hex[0] == '#')
+      hex++;
+    int num = (int) strtol(hex, NULL, 16);
+    double r = ((num >> 16) & 0xFF) / 255.0;
+    double g = ((num >> 8) & 0xFF) / 255.0;
+    double b = (num & 0xFF) / 255.0;
+    printf("%lf %lf %lf\n", r, g, b);
 
     double points[] = {
       x, y+h, 0.0, r, g, b,
@@ -221,8 +240,14 @@ void drawRectangle(double x, double y, double h, double w,
     return;
 }
 
-void drawLine(double startx, double starty, double endx, double endy,
-    double r, double g, double b){
+void drawLine(double startx, double starty, double endx, double endy, char hex[]){
+    if (hex[0] == '#')
+      hex++;
+    int num = (int) strtol(hex, NULL, 16);
+    double r = ((num >> 16) & 0xFF) / 255.0;
+    double g = ((num >> 8) & 0xFF) / 255.0;
+    double b = (num & 0xFF) / 255.0;
+    printf("%lf %lf %lf\n", r, g, b);
     double points[] = {
         startx, starty, 0, r, g, b,
         endx, endy, 0, r, g, b
@@ -295,23 +320,23 @@ int main(int argc, char *argv[]) {
 
   jeomcInit();
 
-  drawCircle(0.0, -0.5, 0.4,1.0,1.0,1.0);
-  drawCircle(0.0, 0.1, 0.30,1.0,1.0,1.0);
-  drawCircle(0.0, 0.6, 0.20,1.0,1.0,1.0);
+  drawCircle(0.0, -0.5, 0.4,"#FFFFFF");
+  drawCircle(0.0, 0.1, 0.30,"#FFFFFF");
+  drawCircle(0.0, 0.6, 0.20,"#FFFFFF");
 
-  drawRectangle(-0.25,0.32,0.15,0.5,1.0,0.0,0.0);
+  drawRectangle(-0.25,0.32,0.15,0.5,"B49EC9");
 
-  drawCircle(-0.08,0.65,0.03,0.0,0.0,0.0);
-  drawCircle(0.08,0.65,0.03,0.0,0.0,0.0);
+  drawCircle(-0.08,0.65,0.03, "#000000");
+  drawCircle(0.08,0.65,0.03, "#000000");
 
-  drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
+  drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56, "E0B949");
 
-  drawCircle(0.0, 0.1, 0.03,0.0,0.0,0.0);
-  drawCircle(0.0, -0.1, 0.03,0.0,0.0,0.0);
-  drawCircle(0.0, -0.3, 0.03,0.0,0.0,0.0);
+  drawCircle(0.0, 0.1, 0.03, "#000000");
+  drawCircle(0.0, -0.1, 0.03, "#000000");
+  drawCircle(0.0, -0.3, 0.03, "#000000");
 
-  drawLine(-0.75,0.55,-0.18,0.3,0.5,0.25,0.0);
-  drawLine(0.75,0.55,0.18,0.3,0.5,0.25,0.0);
+  drawLine(-0.75,0.55,-0.18,0.3, "9A5415");
+  drawLine(0.75,0.55,0.18,0.3, "9A5415");
 
   jeomcRunAndSave();
 }

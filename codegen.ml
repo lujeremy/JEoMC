@@ -62,22 +62,22 @@ let translate (globals, functions) =
       L.declare_function "printf" printf_t the_module in
 
   let drawTriangle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t; float_t; float_t; float_t |] in
+      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t; string_t |] in
   let drawTriangle_func : L.llvalue =
       L.declare_function "drawTriangle" drawTriangle_t the_module in
 
   let drawCircle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t |] in
+      L.function_type i32_t [| float_t; float_t; float_t; string_t |] in
   let drawCircle_func : L.llvalue =
       L.declare_function "drawCircle" drawCircle_t the_module in
 
   let drawRectangle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t; float_t |] in
+      L.function_type i32_t [| float_t; float_t; float_t; float_t; string_t |] in
   let drawRectangle_func : L.llvalue =
       L.declare_function "drawRectangle" drawRectangle_t the_module in
 
   let drawLine_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t; float_t |] in
+      L.function_type i32_t [| float_t; float_t; float_t; float_t; string_t |] in
   let drawLine_func : L.llvalue =
       L.declare_function "drawLine" drawLine_t the_module in
 
@@ -198,14 +198,14 @@ let translate (globals, functions) =
     L.build_call jeomcInit_func [| |] "jeomcInit" builder
       | SCall ("jeomcRunAndSave", []) ->
     L.build_call jeomcRunAndSave_func [| |] "jeomcRunAndSave" builder
-      | SCall ("drawTriangle", [x1;y1;x2;y2;x3;y3;r;g;b]) ->
-    L.build_call drawTriangle_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder x3); (expr builder y3); (expr builder r); (expr builder g); (expr builder b);|] "drawTriangle" builder
-      | SCall ("drawCircle", [x;y;radius;r;g;b]) ->
-    L.build_call drawCircle_func [| (expr builder x); (expr builder y); (expr builder radius); (expr builder r); (expr builder g); (expr builder b); |] "drawCircle" builder
-      | SCall ("drawRectangle", [x;y;w;h;r;g;b]) ->
-    L.build_call drawRectangle_func [| (expr builder x); (expr builder y); (expr builder w); (expr builder h); (expr builder r); (expr builder g); (expr builder b); |] "drawRectangle" builder
-      | SCall ("drawLine", [x1;y1;x2;y2;r;g;b]) ->
-    L.build_call drawLine_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder r); (expr builder g); (expr builder b) |] "drawLine" builder
+      | SCall ("drawTriangle", [x1;y1;x2;y2;x3;y3;c]) ->
+    L.build_call drawTriangle_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder x3); (expr builder y3); (expr builder c); |] "drawTriangle" builder
+      | SCall ("drawCircle", [x;y;radius;c]) ->
+    L.build_call drawCircle_func [| (expr builder x); (expr builder y); (expr builder radius); (expr builder c); |] "drawCircle" builder
+      | SCall ("drawRectangle", [x;y;w;h;c]) ->
+    L.build_call drawRectangle_func [| (expr builder x); (expr builder y); (expr builder w); (expr builder h); (expr builder c); |] "drawRectangle" builder
+      | SCall ("drawLine", [x1;y1;x2;y2;c]) ->
+    L.build_call drawLine_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder c); |] "drawLine" builder
       | SCall ("printf", [e]) ->
 	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder

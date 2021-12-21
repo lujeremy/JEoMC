@@ -1,1 +1,1 @@
-Fatal error: exception Failure("expecting 9 arguments in drawTriangle(x, y, f)")
+Fatal error: exception Failure("expecting 7 arguments in drawTriangle(x, y, f)")
