@@ -39,3 +39,7 @@ testall.log
 *.png
 *.exe
 draw
+
+# Test output
+*.out
+*.diff
