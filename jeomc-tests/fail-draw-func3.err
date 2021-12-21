@@ -1,5 +1,1 @@
-<<<<<<< Updated upstream
-Fatal error: exception Failure("illegal argument found int expected float in f")
-=======
-Fatal error: exception Failure("expecting 7 arguments in drawTriangle(x, y, f)")
->>>>>>> Stashed changes
+Fatal error: exception Failure("expecting 9 arguments in drawTriangle(x, y, f)")

@@ -42,19 +42,10 @@ let check (globals, functions) =
                                                   ("printb", [(Bool, "x")]);
                                                   ("printf", [(Float, "x")]);
                                                   ("prints", [(String, "x")]);
-<<<<<<< Updated upstream
-                                                  ("draw", [(Int, "x")]);
-                                                  ("draw2", [(Int, "x")]);
                                                   ("drawTriangle", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "x3"); (Float, "y3"); (Float, "r"); (Float, "g"); (Float, "b");]);
                                                   ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius"); (Float, "r"); (Float, "g"); (Float, "b");]);
                                                   ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h"); (Float, "r"); (Float, "g"); (Float, "b");]);
-                                                  ("setActiveColor", [(Float, "r"); (Float, "g"); (Float, "b"); (Float, "a")]);
-=======
-                                                  ("drawTriangle", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "x3"); (Float, "y3"); (String, "c");]);
-                                                  ("drawCircle", [(Float, "x"); (Float, "y"); (Float, "radius"); (String, "c");]);
-                                                  ("drawRectangle", [(Float, "x"); (Float, "y"); (Float, "w"); (Float, "h"); (String, "c")]);
-                                                  ("drawLine", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (String, "c")]);
->>>>>>> Stashed changes
+                                                  ("drawLine", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "r"); (Float, "g"); (Float, "b")]);
                                                   ("jeomcInit", [ ]);
                                                   ("jeomcRunAndSave", [ ])
                                                   ]
