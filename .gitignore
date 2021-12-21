@@ -43,3 +43,4 @@ draw
 # Test output
 *.out
 *.diff
+*.err
