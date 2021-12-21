@@ -143,9 +143,6 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     glBindVertexArray(VAO1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-//    glVertexAttribPointer(0,3,GL_DOUBLE,GL_FALSE,0,NULL);
-//    glEnableVertexAttribArray(0);
-
 
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
     glEnableVertexAttribArray(0);
@@ -156,31 +153,23 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     vao_arr[vaoIndex] = VAO1;
     vaoIndex++;
 
-    const char *vertexSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 vertPos;    // Position in attribute location 0\n"
-    "layout (location = 1) in vec3 vertColor;  // Color in attribute location 1\n"
-    "out vec3 theColor;                 // output a color to the fragment shader\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(vertPos.x, vertPos.y, vertPos.z, 1.0);\n"
-    "   theColor = vertColor;\n"
-    "}\0";
+    const char* vertexSource =
+      "#version 330\n"
+      "layout (location = 0) in vec3 vp;    // Position in attribute location 0\n"
+      "layout (location = 1) in vec3 vc;  // Color in attribute location 1\n"
+      "out vec3 theColor;                 // output a color to the fragment shader\n"
+      "void main() {"
+      "    gl_Position = vec4(vp,1.0);"
+      "    theColor = vc;\n"
+      "}";
 
-    // Set a general color using a fragment shader. (A "fragment" is a "pixel".)
-    //    The color value is passed in, obtained from the color(s) on the vertice(s).
-    //    Color values range from 0.0 to 1.0.
-    //    First three values are Red/Green/Blue (RGB).
-    //    Fourth color value (alpha) is 1.0, meaning there is no transparency.
-    const char *fragmentSource =
-    "#version 330 core\n"
-    "in vec3 theColor;      // Color value came from the vertex shader (smoothed) \n"
-    "out vec4 FragColor;    // Color that will be used for the fragment\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(theColor, 1.0f);   // Add alpha value of 1.0.\n"
-    "}\n\0";
-
+    const char* fragmentSource =
+      "#version 330\n"
+      "in vec3 theColor;      // Color value came from the vertex shader (smoothed) \n"
+      "out vec4 FragColor;    // Color that will be used for the fragment\n"
+      "void main() {"
+      "    FragColor = vec4(theColor, 1.0f);"
+      "}";
 
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs,1,&vertexSource,NULL);
@@ -474,24 +463,24 @@ void jeomcRunAndSave() {
         glfwPollEvents();
 
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < shapeIndex; i++) {
-            struct Shape s = *(shape_arr + i);
-
-            // Draw circles
-            if (s.indices > 10) { 
-                glBindVertexArray(s.vao);
-                glDrawArrays(GL_TRIANGLE_FAN,0,30);
-          // Draw Triangles
-            } else if (s.indices == 3) {
-                glBindVertexArray(s.vao);
-                glDrawArrays(GL_TRIANGLES, 0, 3);
-          // Draw Rectangles
-            } else if (s.indices == 6) {
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            }
-        }
+//        for (int i = 0; i < shapeIndex; i++) {
+//            struct Shape s = *(shape_arr + i);
+//
+//            // Draw circles
+//            if (s.indices > 10) {
+//                glBindVertexArray(s.vao);
+//                glDrawArrays(GL_TRIANGLE_FAN,0,30);
+//          // Draw Triangles
+//            } else if (s.indices == 3) {
+//                glBindVertexArray(s.vao);
+//                glDrawArrays(GL_TRIANGLES, 0, 3);
+//          // Draw Rectangles
+//            } else if (s.indices == 6) {
+//                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//            }
+//        }
 
     }
 
