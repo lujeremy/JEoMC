@@ -25,20 +25,6 @@
 /* Keep window, vao array, and an index as global variables */
 GLFWwindow* window;
 
-/* Active rgba values are kept and saved into each shape when they are queued
-   This allows for each shape to have a separate rbga value */
-double active_r = 1.0;
-double active_g = 0.894;
-double active_b = 0.882;
-double active_a = 1.0;
-
-/* Change active rgba values to new ones */
-void setActiveColor(double r, double g, double b, double a) {
-  active_r = r;
-  active_g = g;
-  active_b = b;
-  active_a = a;
-}
 
 /* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
@@ -136,20 +122,23 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     double r, double g, double b) {
 
     double points[] = {
-      x1, y1, 0.0, 0.583,  0.771,  0.014,
-      x2, y2, 0.0, 0.609,  0.115,  0.436,
-      x3, y3, 0.0, 0.327,  0.483,  0.844
+      x1, y1, 0.0, r, g, b,
+      x2, y2, 0.0, r, g, b,
+      x3, y3, 0.0, r, g, b
     };
 
     // bind vao and vbo, buffer points
     bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
-    // compile shaders and draw
+    // compile shaders
     compileShaders();
-    glDrawArrays(GL_TRIANGLES, 0, 3);
 
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glfwSwapBuffers(window);
+
     return;
 }
 
@@ -182,11 +171,14 @@ void drawCircle(double centerx, double centery,double rad,
     bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
-    // compile shaders and draw
+    // compile shaders
     compileShaders();
-    glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
 
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
+    glfwSwapBuffers(window);
+
     return;
     
 }
@@ -218,11 +210,14 @@ void drawRectangle(double x, double y, double h, double w,
     bindElementBuffer();
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
-    // compile shaders and draw
+    // compile shaders
     compileShaders();
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glfwSwapBuffers(window);
+
     return;
 }
 
@@ -241,11 +236,15 @@ void drawLine(double startx, double starty, double endx, double endy,
     glLineWidth(10);
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
-    // compile shaders and draw
+    // compile shaders
     compileShaders();
-    glDrawArrays(GL_LINES, 0, 2);
 
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
+    glDrawArrays(GL_LINES, 0, 2);
+    glfwSwapBuffers(window);
+
+    return;
 }
 
 /* Saves the current GLFW window to a given filepath */
@@ -280,7 +279,11 @@ void jeomcRunAndSave() {
     {
         /* Poll for and process events */
         glfwPollEvents();
+        glfwSwapBuffers(window);
     }
+
+    // swap buffers right before saving image to preserve full image
+    glfwSwapBuffers(window);
 
     saveImage("img.png", window);
     glfwTerminate();
@@ -303,7 +306,6 @@ int main(int argc, char *argv[]) {
 
   drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
 
-  
   drawCircle(0.0, 0.1, 0.03,0.0,0.0,0.0);
   drawCircle(0.0, -0.1, 0.03,0.0,0.0,0.0);
   drawCircle(0.0, -0.3, 0.03,0.0,0.0,0.0);
