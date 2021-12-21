@@ -132,9 +132,27 @@ let translate (globals, functions) =
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = expr builder e in
                           ignore(L.build_store e' (lookup s) builder); e'
+      | SAssignA (s, e1, e2) -> let e1' = expr builder e1 and e2'
+        = expr builder e2
+        and arr = (lookup s) in
+        (ignore( L.build_store e2'
+        (Llvm.build_gep arr[|(Llvm.const_int i32_t 0);
+        (e1')|]
+        ("_gep") builder
+        )
+        builder ); e2')
+      | SAccessA (s, e) -> let e' = expr builder e and arr =
+        lookup s in
+        let gep_ptr = Llvm.build_gep arr[|(
+        Llvm.const_int i32_t 0);
+        (e')|]
+        ("_gep") builder in
+        let result = Llvm.build_load gep_ptr
+        "gep" builder in
+        result
       | SBinop ((A.Float,_ ) as e1, op, e2) ->
-	  let e1' = expr builder e1
-	  and e2' = expr builder e2 in
+	      let e1' = expr builder e1
+	      and e2' = expr builder e2 in
 	  (match op with
 	    A.Add     -> L.build_fadd
 	  | A.Sub     -> L.build_fsub

@@ -15,16 +15,15 @@ let check (globals, functions) =
   (* Verify a list of bindings has no void types or duplicate names *)
   let check_binds (kind : string) (binds : bind list) =
     List.iter (function
-	(Void, b) -> raise (Failure ("illegal void " ^ kind ^ " " ^ b))
-      | ( Array (_) , b ) -> raise ( Failure (" illegal array in global
-context " ^ kind ^ " " ^ b))
+	(Void, b) -> raise (Failure("illegal void " ^ kind ^ " " ^ b))
+      | (Array(_) , b ) -> raise (Failure(" illegal array in global context" ^ kind ^ " " ^ b))
       | _ -> ()) binds;
     let rec dups = function
         [] -> ()
       |	((_,n1) :: (_,n2) :: _) when n1 = n2 ->
 	  raise (Failure ("duplicate " ^ kind ^ " " ^ n1))
       | _ :: t -> dups t
-    in dups (List.sort (fun (_,a) (_,b) -> compare a b) binds)
+    in dups (List.sort (fun(_,a) (_,b) -> compare a b) binds)
   in
 
   (**** Check global variables ****)
@@ -107,6 +106,18 @@ context " ^ kind ^ " " ^ b))
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^ 
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
+      | AssignA (s , e1 , e2 ) as ex -> let ( rt1, e1') = expr e1 and
+        ( rt2, e2') = expr e2 in
+         let err2 = "illegal assignment of " ^ string_of_typ rt2 ^ " in
+          " ^ string_of_expr ex in (check_assign Int rt2 err2,
+          SAssignA (s , ( rt1 , e1'), ( rt2 , e2') ))
+      | AccessA (s , e) as ex -> let lt = type_of_identifier s and
+       (rt , e') = expr e in
+        let err = " illegal assignment " ^ string_of_typ lt
+        ^ " = " ^
+        string_of_typ rt ^ " in " ^ string_of_expr ex
+        in (check_assign Int rt err , SAccessA (s, ( rt , e')
+      ))
       | Unop(op, e) as ex -> 
           let (t, e') = expr e in
           let ty = match op with
