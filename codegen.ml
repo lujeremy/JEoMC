@@ -32,7 +32,8 @@ let translate (globals, functions) =
   and i1_t       = L.i1_type     context
   and float_t    = L.double_type context
   and void_t     = L.void_type   context
-  and cnull      = L.const_null (L.i32_type context)in
+  and cnull      = L.const_null (L.i32_type context)
+  and array_t  n  = L. array_type (L. i32_type context) n in
 
   (* Return the LLVM type for a JEoMC type *)
   let ltype_of_typ = function
@@ -40,6 +41,7 @@ let translate (globals, functions) =
     | A.Bool  -> i1_t
     | A.Float -> float_t
     | A.Void  -> void_t
+    | A. Array (n) -> array_t n
   in
 
   let break_block = ref (cnull) in

@@ -13,6 +13,8 @@ and sx =
   | SAssign of string * sexpr
   | SCall of string * sexpr list
   | SNoexpr
+  | SAssignA of string * sexpr * sexpr
+  | SAccessA of string * sexpr
 
 type sstmt =
     SBlock of sstmt list
@@ -50,7 +52,12 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-				  ) ^ ")"				     
+				  ) ^ ")"	
+  | SNoexpr -> ""
+  | SArrAssign (s , e1 , e2 ) -> s ^ "[" ^ string_of_sexpr e1 ^ "] = "
+    ^ string_of_sexpr e2
+  | SArrAccess (s , e) -> s ^ "[" ^ string_of_sexpr e ^ "]"
+    ) ^ ") "		     
 
 let rec string_of_sstmt = function
     SBlock(stmts) ->

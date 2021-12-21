@@ -16,6 +16,8 @@ let check (globals, functions) =
   let check_binds (kind : string) (binds : bind list) =
     List.iter (function
 	(Void, b) -> raise (Failure ("illegal void " ^ kind ^ " " ^ b))
+      | ( Array (_) , b ) -> raise ( Failure (" illegal array in global
+context " ^ kind ^ " " ^ b))
       | _ -> ()) binds;
     let rec dups = function
         [] -> ()
