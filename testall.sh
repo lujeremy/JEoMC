@@ -20,21 +20,25 @@ if [ ${OS} = "Mac" ]; then
     # Mac OSX
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
     FLAGS="-framework OpenGL -framework GLUT -lglfw -lGLEW"
+
+    # Path to the LLVM interpreter
+    LLI="/usr/local/opt/llvm@8/bin/lli"
+
+    # Path to the LLVM compiler
+    LLC="/usr/local/opt/llvm@8/bin/llc"
 elif [ ${OS} = "Linux" ]; then
     # Assume Linux.
     printf "\nYou are currently running on ${OS}, appropriate C flags will be generated\n\n"
     FLAGS="-lGL -lGLU -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor -lm -lGLEW"
+
+    # Path to the LLVM interpreter
+    LLI="lli"
+
+    # Path to the LLVM compiler
+    LLC="llc"
 else
     printf "\nYou are currently running on ${OS}, we do not support this system\n\n"
 fi
-
-
-# Path to the LLVM interpreter
-LLI="lli"
-#LLI="/usr/local/opt/llvm/bin/lli"
-
-# Path to the LLVM compiler
-LLC="llc"
 
 # Path to the C compiler
 CC="cc"
@@ -62,8 +66,8 @@ Usage() {
 
 SignalError() {
     if [ $error -eq 0 ] ; then
-	echo "FAILED"
-	error=1
+  echo "FAILED"
+  error=1
     fi
     echo "  $1"
 }
@@ -74,8 +78,8 @@ Compare() {
     generatedfiles="$generatedfiles $3"
     echo diff -b $1 $2 ">" $3 1>&2
     diff -b "$1" "$2" > "$3" 2>&1 || {
-	SignalError "$1 differs"
-	echo "FAILED $1 differs from $2" 1>&2
+  SignalError "$1 differs"
+  echo "FAILED $1 differs from $2" 1>&2
     }
 }
 
@@ -84,8 +88,8 @@ Compare() {
 Run() {
     echo $* 1>&2
     eval $* || {
-	SignalError "$1 failed on $*"
-	return 1
+  SignalError "$1 failed on $*"
+  return 1
     }
 }
 
@@ -94,8 +98,8 @@ Run() {
 RunFail() {
     echo $* 1>&2
     eval $* && {
-	SignalError "failed: $* did not report an error"
-	return 1
+  SignalError "failed: $* did not report an error"
+  return 1
     }
     return 0
 }
@@ -117,7 +121,7 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$JEOMC" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
-    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "draw.o draw2.o" "$FLAGS" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "jeomc_draw.o" "$FLAGS" &&
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
@@ -156,26 +160,26 @@ CheckFail() {
     # Report the status and clean up the generated files
 
     if [ $error -eq 0 ] ; then
-	if [ $keep -eq 0 ] ; then
-	    rm -f $generatedfiles
-	fi
-	echo "OK"
-	echo "###### SUCCESS" 1>&2
-    else
-	echo "###### FAILED" 1>&2
-	globalerror=$error
+    if [ $keep -eq 0 ] ; then
+        rm -f $generatedfiles
     fi
-}
+    echo "OK"
+    echo "###### SUCCESS" 1>&2
+      else
+    echo "###### FAILED" 1>&2
+    globalerror=$error
+      fi
+  }
 
-while getopts kdpsh c; do
-    case $c in
-	k) # Keep intermediate files
-	    keep=1
-	    ;;
-	h) # Help
-	    Usage
-	    ;;
-    esac
+  while getopts kdpsh c; do
+      case $c in
+    k) # Keep intermediate files
+        keep=1
+        ;;
+    h) # Help
+        Usage
+        ;;
+      esac
 done
 
 shift `expr $OPTIND - 1`
@@ -192,22 +196,22 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test-*.j tests/fail-*.j"
+    files="jeomc-tests/test-*.j jeomc-tests/fail-*.j microc-tests/fail-*.j microc-tests/test-*.j"
 fi
 
 for file in $files
 do
     case $file in
-	*test-*)
-	    Check $file 2>> $globallog
-	    ;;
-	*fail-*)
-	    CheckFail $file 2>> $globallog
-	    ;;
-	*)
-	    echo "unknown file type $file"
-	    globalerror=1
-	    ;;
+  *test-*)
+      Check $file 2>> $globallog
+      ;;
+  *fail-*)
+      CheckFail $file 2>> $globallog
+      ;;
+  *)
+      echo "unknown file type $file"
+      globalerror=1
+      ;;
     esac
 done
 

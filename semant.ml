@@ -41,6 +41,7 @@ let check (globals, functions) =
     in List.fold_left add_bind StringMap.empty [  ("print", [(Int, "x")]);
                                                   ("printb", [(Bool, "x")]);
                                                   ("printf", [(Float, "x")]);
+                                                  ("prints", [(String, "x")]);
                                                   ("draw", [(Int, "x")]);
                                                   ("draw2", [(Int, "x")]);
                                                   ("drawTriangle", [(Float, "x1"); (Float, "y1"); (Float, "x2"); (Float, "y2"); (Float, "x3"); (Float, "y3"); (Float, "r"); (Float, "g"); (Float, "b");]);
@@ -101,7 +102,8 @@ let check (globals, functions) =
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec expr = function
         Literal  l -> (Int, SLiteral l)
-      | Fliteral l -> (Float, SFliteral l)
+      | Slit l -> (String, SSlit l)
+      | Flit l -> (Float, SFlit l)
       | BoolLit l  -> (Bool, SBoolLit l)
       | Noexpr     -> (Void, SNoexpr)
       | Id s       -> (type_of_identifier s, SId s)

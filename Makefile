@@ -6,7 +6,7 @@ test : all testall.sh
 # "make all" builds the executable as well as the "draw" library designed
 # to test linking external code
 .PHONY : all
-all : jeomc.native draw.o draw2.o
+all : jeomc.native jeomc_draw.o
 
 # "ocamlbuild calc.native" will also build the calculator
 #before: opam config exec --
@@ -19,14 +19,4 @@ jeomc.native :
 clean :
 	ocamlbuild -clean
 	rm -rf testall.log ocamlllvm *.diff *.err *.ll *.s *.exe *.out
-	rm -f *.o draw draw2 img.png
-
-
-##############################
-
-# Not actually necessary
-# draw : draw.c
-# 	cc -o draw -DBUILD_TEST draw.c
-#
-# draw2 : draw2.c
-# 	cc -o draw2 -DBUILD_TEST draw2.c
+	rm -f *.o img.png jeomc_draw

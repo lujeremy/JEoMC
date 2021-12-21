@@ -6,10 +6,13 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL FLOAT VOID
+%token RETURN IF ELSE FOR WHILE INT STRING BOOL FLOAT VOID
+%token CONTINUE BREAK
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT
+%token <string> FLIT
+%token <string> SLIT
+%token <string> ID
 %token EOF
 
 %start program
@@ -54,6 +57,7 @@ formal_list:
 
 typ:
     INT   { Int   }
+  | STRING { String }
   | BOOL  { Bool  }
   | FLOAT { Float }
   | VOID  { Void  }
@@ -78,6 +82,8 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
+  | BREAK SEMI                              { Break }
+  | CONTINUE SEMI                           { Continue }
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -85,7 +91,8 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1)            }
-  | FLIT	     { Fliteral($1)           }
+  | SLIT             { Slit($1) }
+  | FLIT	         { Flit($1)           }
   | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
   | expr PLUS   expr { Binop($1, Add,   $3)   }

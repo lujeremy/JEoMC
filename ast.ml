@@ -5,13 +5,14 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Void
+type typ = Int | String | Bool | Float | Void
 
 type bind = typ * string
 
 type expr =
     Literal of int
-  | Fliteral of string
+  | Slit of string
+  | Flit of string
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -27,6 +28,8 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+  | Break
+  | Continue
 
 type func_decl = {
     typ : typ;
@@ -60,7 +63,8 @@ let string_of_uop = function
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
-  | Fliteral(l) -> l
+  | Slit(l) -> "\"" ^ l ^ "\""
+  | Flit(l) -> l
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
@@ -84,9 +88,12 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | Break -> "break;\n"
+  | Continue -> "continue;\n"
 
 let string_of_typ = function
     Int -> "int"
+  | String -> "string" 
   | Bool -> "bool"
   | Float -> "float"
   | Void -> "void"

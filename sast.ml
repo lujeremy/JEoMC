@@ -5,7 +5,8 @@ open Ast
 type sexpr = typ * sx
 and sx =
     SLiteral of int
-  | SFliteral of string
+  | SSlit of string
+  | SFlit of string
   | SBoolLit of bool
   | SId of string
   | SBinop of sexpr * op * sexpr
@@ -16,11 +17,13 @@ and sx =
 
 type sstmt =
     SBlock of sstmt list
-  | SExpr of sexpr
-  | SReturn of sexpr
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
+  | SBreak
+  | SContinue
+  | SReturn of sexpr
+  | SExpr of sexpr
 
 type sfunc_decl = {
     styp : typ;
@@ -39,7 +42,8 @@ let rec string_of_sexpr (t, e) =
     SLiteral(l) -> string_of_int l
   | SBoolLit(true) -> "true"
   | SBoolLit(false) -> "false"
-  | SFliteral(l) -> l
+  | SSlit(l) -> "\"" ^ l ^ "\""
+  | SFlit(l) -> l
   | SId(s) -> s
   | SBinop(e1, o, e2) ->
       string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
@@ -63,6 +67,8 @@ let rec string_of_sstmt = function
       "for (" ^ string_of_sexpr e1  ^ " ; " ^ string_of_sexpr e2 ^ " ; " ^
       string_of_sexpr e3  ^ ") " ^ string_of_sstmt s
   | SWhile(e, s) -> "while (" ^ string_of_sexpr e ^ ") " ^ string_of_sstmt s
+  | SBreak -> "break;\n"
+  | SContinue -> "continue;\n"
 
 let string_of_sfdecl fdecl =
   string_of_typ fdecl.styp ^ " " ^
