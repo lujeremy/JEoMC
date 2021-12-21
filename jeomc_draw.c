@@ -24,43 +24,7 @@
 
 /* Keep window, vao array, and an index as global variables */
 GLFWwindow* window;
-int vaoIndex = 0;
-GLuint vao_arr[50] = {0};
 
-/* General shape struct to track rgba, Triangle/Rectangle's vao, and Circle's x,y,radius */
-struct Shape {
-  GLuint vao;
-  int indices;
-  double x;
-  double y;
-  double radius;
-  double r;
-  double g;
-  double b;
-  double a;
-};
-
-/* Keep window, shape, and an index as global variables
-   Shape array will be used as a queue to add shapes to be drawn.
-   When user runs jeomcRunAndSave, all queued shapes in array will be rendered accordingly */
-GLFWwindow* window;
-int shapeIndex = 0;
-struct Shape shape_arr[50] = {0};
-
-/* Active rgba values are kept and saved into each shape when they are queued
-   This allows for each shape to have a separate rbga value */
-double active_r = 1.0;
-double active_g = 0.894;
-double active_b = 0.882;
-double active_a = 1.0;
-
-/* Change active rgba values to new ones */
-void setActiveColor(double r, double g, double b, double a) {
-  active_r = r;
-  active_g = g;
-  active_b = b;
-  active_a = a;
-}
 
 /* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
@@ -98,61 +62,7 @@ void jeomcInit() {
     return;
 }
 
-/* Use x, y, and f (offset) coordinates to create a Triangle's VAO
-   Insert vao into global array and increment index */
-void drawTriangleOffset(double x, double y, double f) {
-
-    double points[] = {
-      x, y+f,
-      x+f, y-f,
-      x-f, y-f
-    };
-
-    GLuint VBO1, VAO1;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
-    
-
-    struct Shape s = {VAO1, 3, 0, 0, 0, active_r, active_g, active_b, active_a};
-
-    shape_arr[shapeIndex] = s;
-    shapeIndex++;
-    return;
-}
-
-void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3,
-    double r, double g, double b) {
-
-    double points[] = {
-      x1, y1, 0.0, 0.583,  0.771,  0.014,
-      x2, y2, 0.0, 0.609,  0.115,  0.436,
-      x3, y3, 0.0, 0.327,  0.483,  0.844
-    };
-
-    GLuint VBO1, VAO1, EBO;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3*sizeof(double)));
-    glEnableVertexAttribArray(1);
-
-
-    vao_arr[vaoIndex] = VAO1;
-    vaoIndex++;
-
+void compileShaders() {
     const char* vertexSource =
       "#version 330\n"
       "layout (location = 0) in vec3 vp;    // Position in attribute location 0\n"
@@ -183,10 +93,52 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     glAttachShader(shader_programme,vs);
     glLinkProgram(shader_programme);
     glUseProgram(shader_programme);
-    glfwSwapBuffers(window);
 
+    return;
+}
+
+void bindVertexBufferAndArray() {
+    GLuint vbo, vao;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    return;
+}
+
+void bindElementBuffer() {
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
+
+void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3,
+    double r, double g, double b) {
+
+    double points[] = {
+      x1, y1, 0.0, r, g, b,
+      x2, y2, 0.0, r, g, b,
+      x3, y3, 0.0, r, g, b
+    };
+
+    // bind vao and vbo, buffer points
+    bindVertexBufferAndArray();
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+    // compile shaders
+    compileShaders();
+
+    // swap buffers, draw, then swap back
+    glfwSwapBuffers(window);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glfwSwapBuffers(window);
+
     return;
 }
 
@@ -198,7 +150,7 @@ void drawCircle(double centerx, double centery,double rad,
     double z = 0.0;
     int numPoints = 30;
     int currentSize = 0;
-    double points[numPoints*3];
+    double points[numPoints*6];
 
     while (theta<360){
         x = (double) rad * cos(theta * M_PI / 180.0);
@@ -207,89 +159,28 @@ void drawCircle(double centerx, double centery,double rad,
         points[currentSize++] = x + centerx;
         points[currentSize++] = y + centery;
         points[currentSize++] = z;
+        points[currentSize++] = r;
+        points[currentSize++] = g;
+        points[currentSize++] = b;
 
         theta+=(360/numPoints);
 
     }
 
-    GLuint VBO1, VAO1;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    // bind vao and vbo, buffer points
+    bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,3,GL_DOUBLE,GL_FALSE,0,NULL);
 
-    struct Shape s = {VAO1, numPoints, 0, 0, 0, active_r, active_g, active_b, active_a};
-    shape_arr[shapeIndex] = s;
-    shapeIndex++;
+    // compile shaders
+    compileShaders();
 
-    const char* vertexSource =
-       "#version 330\n"
-       "in vec3 vp;"
-       "void main() {"
-       "    gl_Position = vec4(vp,1.0);"
-       "}";
-
-    const char* fragmentSource;
-    char buf[256];
-    sprintf(buf,"#version 330\n"
-                "out vec4 frag_colour;"
-                "void main() {"
-                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
-                "}",r,g,b,1.0);
-
-    fragmentSource = buf;
-
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vertexSource,NULL);
-    glCompileShader(vs);
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&fragmentSource,NULL);
-    glCompileShader(fs);
-
-    GLuint shader_programme = glCreateProgram();
-    glAttachShader(shader_programme,fs);
-    glAttachShader(shader_programme,vs);
-    glLinkProgram(shader_programme);
-    glUseProgram(shader_programme);
-
-    
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
     glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
     glfwSwapBuffers(window);
+
     return;
     
-}
-
-/* Queues a circle to be drawn with x and y center point and radius*/
-void drawCircleLinux(double x, double y, double radius){
-    struct Shape s = {0, 0, x, y, radius, active_r, active_g, active_b, active_a};
-    shape_arr[shapeIndex] = s;
-    shapeIndex++;
-    return;
-}
-
-/* Actually draws a queued circle using many triangles */
-void drawQueuedCircle(double x, double y, double radius) {
-    int i;
-    int triangleAmount = 30; //# of triangles used to draw circle
-
-    GLfloat twicePi = 2.0f * M_PI;
-
-    glBegin(GL_TRIANGLE_FAN);
-      glVertex2f(x, y); // center of circle
-      for(i = 0; i <= triangleAmount;i++) {
-        glVertex2f(
-                  x + (radius * cos(i *  twicePi / triangleAmount)),
-            y + (radius * sin(i * twicePi / triangleAmount))
-        );
-      }
-    glEnd();
-    return;
 }
 
 /* Draws a rectangle with x and y as the bottom left point and h height, w width
@@ -300,10 +191,10 @@ void drawRectangle(double x, double y, double h, double w,
     double r, double g, double b) {
 
     double points[] = {
-      x, y+h,
-      x+w, y+h,
-      x+w, y,
-      x, y
+      x, y+h, 0.0, r, g, b,
+      x+w, y+h, 0.0, r, g, b,
+      x+w, y, 0.0, r, g, b,
+      x, y, 0.0, r, g, b
     };
 
     GLuint elements[] = {
@@ -311,122 +202,49 @@ void drawRectangle(double x, double y, double h, double w,
         2, 3, 0
     };
 
-    GLuint VBO1, VAO1, ebo;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-
-    glGenBuffers(1, &ebo);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    // bind vao and vbo, buffer points
+    bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
-    glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    // bind ebo and buffer points
+    bindElementBuffer();
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
-    struct Shape s = {VAO1, 6, 0, 0, 0, active_r, active_g, active_b, active_a};
+    // compile shaders
+    compileShaders();
 
-    shape_arr[shapeIndex] = s;
-    shapeIndex++;
-
-    const char* vertexSource =
-       "#version 330\n"
-       "in vec3 vp;"
-       "void main() {"
-       "    gl_Position = vec4(vp,1.0);"
-       "}";
-
-    const char* fragmentSource;
-    char buf[256];
-    sprintf(buf,"#version 330\n"
-                "out vec4 frag_colour;"
-                "void main() {"
-                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
-                "}",r,g,b,1.0);
-
-    fragmentSource = buf;
-
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vertexSource,NULL);
-    glCompileShader(vs);
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&fragmentSource,NULL);
-    glCompileShader(fs);
-
-    GLuint shader_programme = glCreateProgram();
-    glAttachShader(shader_programme,fs);
-    glAttachShader(shader_programme,vs);
-    glLinkProgram(shader_programme);
-    glUseProgram(shader_programme);
-
-    
+    // swap buffers, draw, then swap back
     glfwSwapBuffers(window);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(window);
+
     return;
 }
 
 void drawLine(double startx, double starty, double endx, double endy,
     double r, double g, double b){
     double points[] = {
-        startx, starty,
-        endx, endy
+        startx, starty, 0, r, g, b,
+        endx, endy, 0, r, g, b
     };
 
-    GLuint VBO1, VAO1;
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
-
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    // bind vao and vbo, buffer points
+    bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,2,GL_DOUBLE,GL_FALSE,0,NULL);
-    glLineWidth(2);
 
-    struct Shape s = {VAO1, 4, 0, 0, 0, active_r, active_g, active_b, active_a};
-    shape_arr[shapeIndex] = s;
-    shapeIndex++;
-
-    const char* vertexSource =
-       "#version 330\n"
-       "in vec3 vp;"
-       "void main() {"
-       "    gl_Position = vec4(vp,1.0);"
-       "}";
-
-    const char* fragmentSource;
-    char buf[256];
-    sprintf(buf,"#version 330\n"
-                "out vec4 frag_colour;"
-                "void main() {"
-                "    frag_colour = vec4(%0.1f,%0.1f,%0.1f,%0.1f);"
-                "}",r,g,b,1.0);
-
-    fragmentSource = buf;
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vertexSource,NULL);
-    glCompileShader(vs);
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&fragmentSource,NULL);
-    glCompileShader(fs);
-
-    GLuint shader_programme = glCreateProgram();
-    glAttachShader(shader_programme,fs);
-    glAttachShader(shader_programme,vs);
-    glLinkProgram(shader_programme);
-    glUseProgram(shader_programme);
-
-    
-    glfwSwapBuffers(window);
-
+    // set line width
+    glLineWidth(10);
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+
+    // compile shaders
+    compileShaders();
+
+    // swap buffers, draw, then swap back
+    glfwSwapBuffers(window);
     glDrawArrays(GL_LINES, 0, 2);
     glfwSwapBuffers(window);
+
+    return;
 }
 
 /* Saves the current GLFW window to a given filepath */
@@ -461,28 +279,11 @@ void jeomcRunAndSave() {
     {
         /* Poll for and process events */
         glfwPollEvents();
-
-        /* Render here */
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//        for (int i = 0; i < shapeIndex; i++) {
-//            struct Shape s = *(shape_arr + i);
-//
-//            // Draw circles
-//            if (s.indices > 10) {
-//                glBindVertexArray(s.vao);
-//                glDrawArrays(GL_TRIANGLE_FAN,0,30);
-//          // Draw Triangles
-//            } else if (s.indices == 3) {
-//                glBindVertexArray(s.vao);
-//                glDrawArrays(GL_TRIANGLES, 0, 3);
-//          // Draw Rectangles
-//            } else if (s.indices == 6) {
-//                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-//            }
-//        }
-
+        glfwSwapBuffers(window);
     }
+
+    // swap buffers right before saving image to preserve full image
+    glfwSwapBuffers(window);
 
     saveImage("img.png", window);
     glfwTerminate();
@@ -505,7 +306,6 @@ int main(int argc, char *argv[]) {
 
   drawTriangle(0.0,0.6,0.15,0.58,0.0,0.56,1.0,0.8,0.0);
 
-  
   drawCircle(0.0, 0.1, 0.03,0.0,0.0,0.0);
   drawCircle(0.0, -0.1, 0.03,0.0,0.0,0.0);
   drawCircle(0.0, -0.3, 0.03,0.0,0.0,0.0);
