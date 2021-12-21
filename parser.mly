@@ -5,7 +5,7 @@ open Ast
 %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
-%token NOT EQ NEQ LT LEQ GT GEQ AND OR RIGHTB LEFTB ARRAY
+%token NOT EQ NEQ LT LEQ GT GEQ AND OR RBRACKET LBRACKET ARRAY
 %token RETURN IF ELSE FOR WHILE INT BOOL FLOAT VOID
 %token CONTINUE BREAK
 %token <int> LITERAL
@@ -58,7 +58,7 @@ typ:
   | BOOL  { Bool  }
   | FLOAT { Float }
   | VOID  { Void  }
-  | ARRAY LEFTB LITERAL RIGHTB { Array ( $3 ) }
+  | ARRAY LBRACKET LITERAL RBRACKET { Array ( $3 ) }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -109,8 +109,8 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
-  | ID LEFTB expr RIGHTB ASSIGN expr { AssignA ($1 , $3 , $6 ) }
-  | ID LEFTB expr RIGHTB { AccessA ($1 , $3 ) }
+  | ID LBRACKET expr RBRACKET ASSIGN expr { AssignA ($1 , $3 , $6 ) }
+  | ID LBRACKET expr RBRACKET { AccessA ($1 , $3 ) }
 
 args_opt:
     /* nothing */ { [] }

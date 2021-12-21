@@ -52,11 +52,9 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-				  ) ^ ")"	
-  | SNoexpr -> ""
-  | SArrAssign (s , e1 , e2 ) -> s ^ "[" ^ string_of_sexpr e1 ^ "] = "
+  | SAssignA (s , e1 , e2 ) -> s ^ "[" ^ string_of_sexpr e1 ^ "] = "
     ^ string_of_sexpr e2
-  | SArrAccess (s , e) -> s ^ "[" ^ string_of_sexpr e ^ "]"
+  | SAccessA (s , e) -> s ^ "[" ^ string_of_sexpr e ^ "]"
     ) ^ ") "		     
 
 let rec string_of_sstmt = function
