@@ -1,1 +1,5 @@
+<<<<<<< Updated upstream
 Fatal error: exception Failure("expecting 3 arguments in drawTriangle(x, y)")
+=======
+Fatal error: exception Failure("expecting 7 arguments in drawTriangle(x, y)")
+>>>>>>> Stashed changes
