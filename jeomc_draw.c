@@ -22,9 +22,8 @@
 #include <GL/glut.h>
 #endif
 
-/* Keep window, vao array, and an index as global variables */
+/* Keep window as global variable */
 GLFWwindow* window;
-
 
 /* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
@@ -147,10 +146,7 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     compileShaders();
 
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    glfwSwapBuffers(window);
-
     return;
 }
 
@@ -198,12 +194,8 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
     compileShaders();
 
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
     glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
-    glfwSwapBuffers(window);
-
     return;
-    
 }
 
 /* Draws a rectangle with x and y as the bottom left point and h height, w width
@@ -247,11 +239,7 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
     // compile shaders
     compileShaders();
 
-    // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glfwSwapBuffers(window);
-
     return;
 }
 
@@ -286,9 +274,7 @@ void drawLine(double startx, double starty, double endx, double endy, char hex[]
     compileShaders();
 
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
     glDrawArrays(GL_LINES, 0, 2);
-    glfwSwapBuffers(window);
 
     return;
 }
@@ -320,12 +306,14 @@ void saveImage(char *filepath, GLFWwindow *w){
  */
 void jeomcRunAndSave() {
 
+    // swap buffers to show drawing
+    glfwSwapBuffers(window);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Poll for and process events */
         glfwPollEvents();
-        glfwSwapBuffers(window);
     }
 
     // swap buffers right before saving image to preserve full image
