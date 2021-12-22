@@ -198,11 +198,15 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
     return;
 }
 
-/* Draws a rectangle with x and y as the bottom left point and h height, w width
+/* Draws a rectangle with
+   top left x1,y1
+   top right x2,y2
+   bottom right x3,y3
+   bottom left x4,y4
    We use element buffers and drawElement instead to simplify the number of points
    needed (otherwise we would need to pass in 6 points for the 2 triangles).
 */
-void drawRectangle(double x, double y, double h, double w, char hex[]) {
+void drawRectangle(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, char hex[]) {
     if (hex[0] == '#')
       hex++;
     int num = (int) strtol(hex, NULL, 16);
@@ -211,10 +215,10 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
     double b = (num & 0xFF) / 255.0;
 
     double points[] = {
-      x, y+h, 0.0, r, g, b,
-      x+w, y+h, 0.0, r, g, b,
-      x+w, y, 0.0, r, g, b,
-      x, y, 0.0, r, g, b
+      x1, y1, 0.0, r, g, b,
+      x2, y2, 0.0, r, g, b,
+      x3, y3, 0.0, r, g, b,
+      x4, y4, 0.0, r, g, b
     };
 
     printf("Drawing rectangle:\n");
@@ -333,7 +337,7 @@ int main(int argc, char *argv[]) {
   drawCircle(0.0, 0.1, 0.30,"#FFFFFF");
   drawCircle(0.0, 0.6, 0.20,"#FFFFFF");
 
-  drawRectangle(-0.25,0.32,0.15,0.5,"B49EC9");
+  drawRectangle(-0.25, 0.47 , 0.25,0.47,   0.25,0.32,  -0.25,0.32   ,"B49EC9");
 
   drawCircle(-0.08,0.65,0.03, "#000000");
   drawCircle(0.08,0.65,0.03, "#000000");
