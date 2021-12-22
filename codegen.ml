@@ -72,7 +72,7 @@ let translate (globals, functions) =
       L.declare_function "drawCircle" drawCircle_t the_module in
 
   let drawRectangle_t : L.lltype =
-      L.function_type i32_t [| float_t; float_t; float_t; float_t; string_t |] in
+      L.function_type i32_t [| float_t; float_t; float_t; float_t; float_t; float_t; float_t; float_t; string_t |] in
   let drawRectangle_func : L.llvalue =
       L.declare_function "drawRectangle" drawRectangle_t the_module in
 
@@ -202,8 +202,8 @@ let translate (globals, functions) =
     L.build_call drawTriangle_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder x3); (expr builder y3); (expr builder c); |] "drawTriangle" builder
       | SCall ("drawCircle", [x;y;radius;c]) ->
     L.build_call drawCircle_func [| (expr builder x); (expr builder y); (expr builder radius); (expr builder c); |] "drawCircle" builder
-      | SCall ("drawRectangle", [x;y;w;h;c]) ->
-    L.build_call drawRectangle_func [| (expr builder x); (expr builder y); (expr builder w); (expr builder h); (expr builder c); |] "drawRectangle" builder
+      | SCall ("drawRectangle", [x1;y1;x2;y2;x3;y3;x4;y4;c]) ->
+    L.build_call drawRectangle_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder x3); (expr builder y3); (expr builder x4); (expr builder y4); (expr builder c); |] "drawRectangle" builder
       | SCall ("drawLine", [x1;y1;x2;y2;c]) ->
     L.build_call drawLine_func [| (expr builder x1); (expr builder y1); (expr builder x2); (expr builder y2); (expr builder c); |] "drawLine" builder
       | SCall ("printf", [e]) ->
