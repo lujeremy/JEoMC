@@ -1,0 +1,4 @@
+1c1
+< Fatal error: exception Failure("unrecognized function jeomcRunAndSave")
+---
+> Fatal error: exception Failure("expecting 7 arguments in drawTriangle(x, y)")
