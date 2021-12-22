@@ -7,7 +7,7 @@ int main()
   drawCircle(0.0, 0.1, 0.30,"#FFFFFF");
   drawCircle(0.0, 0.6, 0.20,"#FFFFFF");
 
-  drawRectangle(-0.25,0.32,0.15,0.5,"B49EC9");
+  drawRectangle(-0.25, 0.47 , 0.25,0.47,   0.25,0.32,  -0.25,0.32   ,"B49EC9");
 
   drawCircle(-0.08,0.65,0.03, "#000000");
   drawCircle(0.08,0.65,0.03, "#000000");

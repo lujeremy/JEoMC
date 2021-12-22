@@ -3,6 +3,11 @@
 test : all testall.sh
 	./testall.sh
 
+# "make test" Compiles everything and runs the drawing demos
+.PHONY : demo
+demo : all demo.sh
+	./demo.sh
+
 # "make all" builds the executable as well as the "draw" library designed
 # to test linking external code
 .PHONY : all
