@@ -1,5 +1,5 @@
 /*
-Fail: Trying to supply invalid arguments (int when it's supposed to be float)
+Fail: Trying to supply invalid arguments (float when the last arg needs to be string hexcode)
 */
 
 int main()
@@ -14,7 +14,7 @@ int main()
 
   jeomcInit();
 
-  drawTriangle(x, y, f);
+  drawTriangle(x, y, x, y, x, y, x);
 
   jeomcRunAndSave();
 
