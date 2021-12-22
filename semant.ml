@@ -108,8 +108,8 @@ let check (globals, functions) =
           in (check_assign lt rt err, SAssign(var, (rt, e')))
       | AssignA (s , e1 , e2 ) as ex -> let ( rt1, e1') = expr e1 and
         ( rt2, e2') = expr e2 in
-         let err2 = "illegal assignment of " ^ string_of_typ rt2 ^ " in
-          " ^ string_of_expr ex in (check_assign Int rt2 err2,
+         let err2 = "illegal assignment of " ^string_of_typ rt2^ "in" 
+         ^string_of_expr ex in (check_assign Int rt2 err2,
           SAssignA (s , ( rt1 , e1'), ( rt2 , e2') ))
       | AccessA (s , e) as ex -> let lt = type_of_identifier s and
        (rt , e') = expr e in

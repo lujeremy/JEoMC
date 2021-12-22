@@ -109,8 +109,8 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
-  | ID LBRACKET expr RBRACKET ASSIGN expr { AssignA ($1 , $3 , $6 ) }
-  | ID LBRACKET expr RBRACKET { AccessA ($1 , $3 ) }
+  | ID LEFTB expr RIGHTB ASSIGN expr { AssignA ($1 , $3 , $6 ) }
+  | ID LEFTB expr RIGHTB { AccessA ($1 , $3 ) }
 
 args_opt:
     /* nothing */ { [] }
