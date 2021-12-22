@@ -22,9 +22,16 @@
 #include <GL/glut.h>
 #endif
 
+/* General shape struct to track vao and shape */
+struct Shape {
+  GLuint vao;
+  int shape;
+};
+
 /* Keep window, vao array, and an index as global variables */
 GLFWwindow* window;
-
+int shapeIndex = 0;
+struct Shape shape_arr[50] = {0};
 
 /* Initialize glfw, creating the window to the global var */
 void jeomcInit() {
@@ -59,6 +66,7 @@ void jeomcInit() {
 
     glewExperimental = GL_TRUE;
     glewInit();
+
     return;
 }
 
@@ -97,7 +105,7 @@ void compileShaders() {
     return;
 }
 
-void bindVertexBufferAndArray() {
+GLuint bindVertexBufferAndArray() {
     GLuint vbo, vao;
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -109,7 +117,7 @@ void bindVertexBufferAndArray() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3*sizeof(double)));
     glEnableVertexAttribArray(1);
-    return;
+    return vao;
 }
 
 void bindElementBuffer() {
@@ -140,16 +148,31 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     printf("\n");
 
     // bind vao and vbo, buffer points
-    bindVertexBufferAndArray();
+    GLuint vbo, vao;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
     // compile shaders
-    compileShaders();
+//    compileShaders();
+
+    struct Shape s = {vao, 3};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
 
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glfwSwapBuffers(window);
+//    glfwSwapBuffers(window);
+//    glDrawArrays(GL_TRIANGLES, 0, 3);
+//    glfwSwapBuffers(window);
 
     return;
 }
@@ -191,19 +214,22 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
     printf("RGB:(%lf, %lf, %lf)\n\n", r, g, b);
 
     // bind vao and vbo, buffer points
-    bindVertexBufferAndArray();
+    GLuint vao = bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
     // compile shaders
-    compileShaders();
+//    compileShaders();
 
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
-    glfwSwapBuffers(window);
+//    glfwSwapBuffers(window);
+//    glDrawArrays(GL_TRIANGLE_FAN, 0, numPoints);
+//    glfwSwapBuffers(window);
+    struct Shape s = {vao, 0};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
 
     return;
-    
+
 }
 
 /* Draws a rectangle with x and y as the bottom left point and h height, w width
@@ -237,7 +263,7 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
     };
 
     // bind vao and vbo, buffer points
-    bindVertexBufferAndArray();
+    GLuint vao = bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
     // bind ebo and buffer points
@@ -245,12 +271,15 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
     // compile shaders
-    compileShaders();
+//    compileShaders();
 
+    struct Shape s = {vao, 1};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glfwSwapBuffers(window);
+//    glfwSwapBuffers(window);
+//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//    glfwSwapBuffers(window);
 
     return;
 }
@@ -275,20 +304,19 @@ void drawLine(double startx, double starty, double endx, double endy, char hex[]
     printf("\n");
 
     // bind vao and vbo, buffer points
-    bindVertexBufferAndArray();
+    GLuint vao = bindVertexBufferAndArray();
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
-    // set line width
-    glLineWidth(10);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-
     // compile shaders
-    compileShaders();
+//    compileShaders();
 
+    struct Shape s = {vao, 2};
+    shape_arr[shapeIndex] = s;
+    shapeIndex++;
     // swap buffers, draw, then swap back
-    glfwSwapBuffers(window);
-    glDrawArrays(GL_LINES, 0, 2);
-    glfwSwapBuffers(window);
+//    glfwSwapBuffers(window);
+//    glDrawArrays(GL_LINES, 0, 2);
+//    glfwSwapBuffers(window);
 
     return;
 }
@@ -319,17 +347,36 @@ void saveImage(char *filepath, GLFWwindow *w){
     3. Saves window as an image to img.png
  */
 void jeomcRunAndSave() {
-
     /* Loop until the user closes the window */
+
     while (!glfwWindowShouldClose(window))
     {
         /* Poll for and process events */
         glfwPollEvents();
+
+        compileShaders();
+
+        /* Render here */
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        for (int i = 0; i < shapeIndex; i++) {
+          struct Shape s = *(shape_arr + i);
+          if (s.shape == 0) {
+            glBindVertexArray(s.vao);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 30);
+          } else if (s.shape == 1) {
+            glBindVertexArray(s.vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+          } else if (s.shape == 2) {
+            glBindVertexArray(s.vao);
+            glDrawArrays(GL_LINES, 0, 2);
+          } else if (s.shape == 3) {
+            glBindVertexArray(s.vao);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+          }
+        }
         glfwSwapBuffers(window);
     }
-
-    // swap buffers right before saving image to preserve full image
-    glfwSwapBuffers(window);
 
     saveImage("img.png", window);
     glfwTerminate();
