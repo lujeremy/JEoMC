@@ -125,13 +125,19 @@ void drawTriangle(double x1, double y1, double x2, double y2, double x3, double 
     double r = ((num >> 16) & 0xFF) / 255.0;
     double g = ((num >> 8) & 0xFF) / 255.0;
     double b = (num & 0xFF) / 255.0;
-    printf("%lf %lf %lf\n", r, g, b);
 
     double points[] = {
       x1, y1, 0.0, r, g, b,
       x2, y2, 0.0, r, g, b,
       x3, y3, 0.0, r, g, b
     };
+
+    printf("Drawing triangle:\n");
+    for (int i = 0; i < sizeof(points) / sizeof(double); i+= 6) {
+      printf("Vertex: (%lf, %lf, %lf) RGB: (%lf, %lf, %lf)\n", points[i], points[i+1],points[i+2],points[i+3],points[i+4],points[i+5]);
+    }
+
+    printf("\n");
 
     // bind vao and vbo, buffer points
     bindVertexBufferAndArray();
@@ -155,7 +161,7 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
     double r = ((num >> 16) & 0xFF) / 255.0;
     double g = ((num >> 8) & 0xFF) / 255.0;
     double b = (num & 0xFF) / 255.0;
-    printf("%lf %lf %lf\n", r, g, b);
+
 
     int theta = 0;
     double x;
@@ -179,6 +185,10 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
         theta+=(360/numPoints);
 
     }
+
+    // For circle we will avoid printing out each vertex just because there are too many
+    printf("Drawing circle:\n");
+    printf("RGB:(%lf %lf %lf)\n\n", r, g, b);
 
     // bind vao and vbo, buffer points
     bindVertexBufferAndArray();
@@ -207,7 +217,6 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
     double r = ((num >> 16) & 0xFF) / 255.0;
     double g = ((num >> 8) & 0xFF) / 255.0;
     double b = (num & 0xFF) / 255.0;
-    printf("%lf %lf %lf\n", r, g, b);
 
     double points[] = {
       x, y+h, 0.0, r, g, b,
@@ -215,6 +224,12 @@ void drawRectangle(double x, double y, double h, double w, char hex[]) {
       x+w, y, 0.0, r, g, b,
       x, y, 0.0, r, g, b
     };
+
+    printf("Drawing rectangle:\n");
+    for (int i = 0; i < sizeof(points) / sizeof(double); i+= 6) {
+      printf("Vertex: (%lf, %lf, %lf) RGB: (%lf, %lf, %lf)\n", points[i], points[i+1],points[i+2],points[i+3],points[i+4],points[i+5]);
+    }
+    printf("\n");
 
     GLuint elements[] = {
         0, 1, 2,
@@ -247,11 +262,17 @@ void drawLine(double startx, double starty, double endx, double endy, char hex[]
     double r = ((num >> 16) & 0xFF) / 255.0;
     double g = ((num >> 8) & 0xFF) / 255.0;
     double b = (num & 0xFF) / 255.0;
-    printf("%lf %lf %lf\n", r, g, b);
+
     double points[] = {
         startx, starty, 0, r, g, b,
         endx, endy, 0, r, g, b
     };
+
+    printf("Drawing line:\n");
+    for (int i = 0; i < sizeof(points) / sizeof(double); i+= 6) {
+      printf("Vertex: (%lf, %lf, %lf) RGB: (%lf, %lf, %lf)\n", points[i], points[i+1],points[i+2],points[i+3],points[i+4],points[i+5]);
+    }
+    printf("\n");
 
     // bind vao and vbo, buffer points
     bindVertexBufferAndArray();
