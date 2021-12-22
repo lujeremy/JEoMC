@@ -1,5 +1,5 @@
 /*
-Fail: Trying to supply too few arguments when func expects 3
+Fail: Trying to supply too few arguments when func expects 7
 */
 
 int main()

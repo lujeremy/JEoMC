@@ -41,6 +41,6 @@ testall.log
 draw
 
 # Test output
-./*.out
-./*.diff
-./*.err
+/*.out
+/*.diff
+/*.err

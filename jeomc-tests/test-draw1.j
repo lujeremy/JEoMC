@@ -6,7 +6,7 @@ int main()
 
   jeomcInit();
 
-  drawRectangle(-0.25,0.32,0.15,0.5,"B49EC9");
+  drawRectangle(-0.25, 0.47 , 0.25,0.47,   0.25,0.32,  -0.25,0.32   ,"B49EC9");
 
   return 0;
 }
