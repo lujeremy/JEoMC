@@ -188,7 +188,7 @@ void drawCircle(double centerx, double centery,double rad, char hex[]){
 
     // For circle we will avoid printing out each vertex just because there are too many
     printf("Drawing circle:\n");
-    printf("RGB:(%lf %lf %lf)\n\n", r, g, b);
+    printf("RGB:(%lf, %lf, %lf)\n\n", r, g, b);
 
     // bind vao and vbo, buffer points
     bindVertexBufferAndArray();
