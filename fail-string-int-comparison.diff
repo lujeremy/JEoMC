@@ -1,0 +1,4 @@
+1c1
+< Fatal error: exception Stdlib.Parsing.Parse_error
+---
+> Fatal error: exception Failure("illegal binary operator string == int in j == i")

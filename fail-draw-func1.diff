@@ -1,0 +1,5 @@
+1c1
+< Fatal error: exception Failure("unrecognized function jeomcInit")
+---
+> Fatal error: exception Failure("expecting 0 arguments in jeomcInit(x)")
+\ No newline at end of file
